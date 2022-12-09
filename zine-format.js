@@ -1,13 +1,13 @@
 import {
   makeId,
-} from '../utils/id-utils.js';
-import {
-  mainImageKey,
-} from '../zine/zine-data-specs.js';
+} from './id-utils.js';
+// import {
+//   mainImageKey,
+// } from '../zine/zine-data-specs.js';
 import {
   zbencode,
   zbdecode,
-} from '../utils/encoding.mjs';
+} from './encoding.js';
 
 //
 

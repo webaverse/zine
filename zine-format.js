@@ -15,35 +15,6 @@ export const zineMagicBytes = 'ZINE';
 
 //
 
-/* class KeyPath {
-  constructor(keyPath) {
-    this.keyPath = keyPath;
-  }
-  get(o) {
-    return this.keyPath.reduce((o, key) => o[key], o);
-  }
-  set(o, value) {
-    const keyPath = this.keyPath.slice();
-    const key = keyPath.pop();
-    const o2 = keyPath.reduce((o, key) => o[key], o);
-    o2[key] = value;
-  }
-  delete(o) {
-    const keyPath = this.keyPath.slice();
-    const key = keyPath.pop();
-    const o2 = keyPath.reduce((o, key) => o[key], o);
-    delete o2[key];
-  }
-} */
-
-//
-
-function filterNumbers(a) {
-  return a.filter(x => typeof x === 'number');
-}
-
-//
-
 // o is structured like:
 // o = [
 //   [key, value],
@@ -217,19 +188,11 @@ export class ZineStoryboard extends EventTarget {
     return this.#panels;
   }
   addPanel() {
-    // if (!this.zd) {
-    //   console.warn('no zd c', this);
-    //   debugger;
-    // }
-
     const id = makeId();
     const keyPath = this.prefix.concat([id]);
     this.zd.setData(keyPath, []);
 
-    // console.log('got panels', this.#panels.slice(), this.#panels.map(p => p.id), keyPath);
-    // const panel = this.#panels.find(panel => panel.id === id);
     const panel = this.#panels[this.#panels.length - 1];
-    // console.log('zine add panel', panel);
     return panel;
   }
 
@@ -366,20 +329,11 @@ export class ZinePanel extends EventTarget {
     return this.#layers[index];
   }
   addLayer() {
-    // if (!this.zd) {
-    //   console.warn('no zd d', this);
-    //   debugger;
-    // }
-
     const id = makeId();
     const keyPath = this.prefix.concat([id]);
     this.zd.setData(keyPath, []);
 
     const layer = this.#layers.find(layer => layer.id === id);
-    if (!layer) {
-      console.warn('failed to get layer');
-      debugger;
-    }
     return layer;
   }
 
@@ -408,35 +362,13 @@ class ZineLayer extends EventTarget {
   }
   prefix;
   getData(key) {
-    // if (!this.zd) {
-    //   console.warn('no zd a', this);
-    //   debugger;
-    // }
-
-    // if (!key) {
-    //   console.warn('no key during get', key);
-    //   debugger;
-    // }
-
     const keyPath = this.prefix.concat([key]);
     const value = this.zd.getData(keyPath);
-    // console.log('get data', key, value, keyPath, structuredClone(this.zd.data));
     return value;
   }
   setData(key, value) {
-    // if (!this.zd) {
-    //   console.warn('no zd a', this);
-    //   debugger;
-    // }
-    
-    // if (!key) {
-    //   console.warn('no key during set', key);
-    //   debugger;
-    // }
-    
     const keyPath = this.prefix.concat([key]);
     this.zd.setData(keyPath, value);
-    // console.log('set data', [key, value], keyPath);
 
     this.dispatchEvent(new MessageEvent('update', {
       data: {
@@ -563,33 +495,9 @@ export class ZineData extends EventTarget {
   getKeys(key) {
     const parent = this.getData(key);
     if (parent) {
-      // console.log('get keys for', structuredClone(this.data));
       return parent.map(([key]) => key);
     } else {
       return [];
     }
   }
-  // hasDataMatch(regex) {
-  //   return this.data.some(item => regex.test(item.key));
-  // }
-  // getDataLayersMatchingSpec(layersSpecs) {
-  //   return this.getDataLayersMatchingSpecs([layersSpecs]);
-  // }
-  // getDataLayersMatchingSpecs(layersSpecsArray) {
-  //   const maxLayers = 10;
-  //   const layers = [];
-  //   for (let i = 0; i < maxLayers; i++) {
-  //     const layerDatas = this.getDatas().filter(({key}) => {
-  //       return key.startsWith('layer' + i + '/');
-  //     });
-  //     if (layersSpecsArray.some(layersSpecs =>
-  //       layersSpecs.every(spec => {
-  //         return layerDatas.some(({key}) => key.endsWith('/' + spec.name));
-  //       })
-  //     )) {
-  //       layers[i] = layerDatas;
-  //     }
-  //   }
-  //   return layers;
-  // }
 }

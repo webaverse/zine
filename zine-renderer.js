@@ -21,12 +21,19 @@ import {
 } from './zine-camera-utils.js';
 import {
   floorNetPixelSize,
+  physicsPixelStride,
 } from './zine-constants.js';
 
 //
 
 // const upVector = new THREE.Vector3(0, 1, 0);
 const backwardVector = new THREE.Vector3(0, 0, 1);
+
+const fakeMaterial = new THREE.MeshBasicMaterial({
+  color: 0x0000FF,
+  transparent: true,
+  opacity: 0.2,
+});
 
 //
 
@@ -161,6 +168,41 @@ class SceneMesh extends THREE.Mesh {
 
       sceneMesh.visible = true;
     })();
+  }
+}
+
+//
+
+class ScenePhysicsMesh extends THREE.Mesh {
+  constructor({
+    pointCloudArrayBuffer,
+    width,
+    height,
+  }) {
+    let geometry = pointCloudArrayBufferToGeometry(
+      pointCloudArrayBuffer,
+      width,
+      height,
+      physicsPixelStride,
+    );
+    // geometry.setAttribute('segment', new THREE.BufferAttribute(segmentSpecs.array, 1));
+    // geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentSpecs.colorArray, 3));
+    // geometry.setAttribute('plane', new THREE.BufferAttribute(planeSpecs.array, 1));
+    // geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeSpecs.colorArray, 3));
+    // // geometry.setAttribute('portal', new THREE.BufferAttribute(portalSpecs.array, 1));
+    // geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalSpecs.colorArray, 3));
+    // const indexedGeometry = geometry;
+    // geometry = geometry.toNonIndexed();
+    // decorateGeometryTriangleIds(geometry);
+    super(geometry, fakeMaterial);
+
+    const scenePhysicsMesh = this;
+    scenePhysicsMesh.name = 'scenePhysicsMesh';
+    scenePhysicsMesh.visible = false;
+    scenePhysicsMesh.enabled = false;
+    scenePhysicsMesh.updateVisibility = () => {
+      scenePhysicsMesh.visible = scenePhysicsMesh.enabled;
+    };
   }
 }
 
@@ -315,10 +357,8 @@ export class ZineRenderer {
     const imgArrayBuffer = layer0.getData(mainImageKey);
     const resolution = layer1.getData('resolution');
     const segmentMask = layer1.getData('segmentMask');
-    // const labelImageData = layer1.getData('labelImageData');
     const pointCloudHeaders = layer1.getData('pointCloudHeaders');
-    let pointCloudArrayBuffer = layer1.getData('pointCloud');
-    // const planeMatrices = layer1.getData('planeMatrices');
+    const pointCloudArrayBuffer = layer1.getData('pointCloud');
     const planesJson = layer1.getData('planesJson');
     const planesMask = layer1.getData('planesMask');
     const portalJson = layer1.getData('portalJson');
@@ -354,6 +394,13 @@ export class ZineRenderer {
       firstFloorPlaneIndex,
     });
     this.sceneMesh = sceneMesh;
+
+    const scenePhysicsMesh = new ScenePhysicsMesh({
+      pointCloudArrayBuffer,
+      width: resolution[0],
+      height: resolution[1],
+    });
+    this.scenePhysicsMesh = scenePhysicsMesh;
 
     // floor net mesh
     const floorNetMesh = new FloorNetMesh();

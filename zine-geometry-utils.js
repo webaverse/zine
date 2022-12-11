@@ -10,18 +10,31 @@ const pointcloudStride = 4 + 4 + 4 + 1 + 1 + 1;
 
 //
 
-export function pointCloudArrayBufferToPositionAttributeArray(arrayBuffer, width, height, float32Array) { // result in float32Array
-  // const numPixels = arrayBuffer.byteLength / pointcloudStride;
-  // const width = Math.sqrt(numPixels);
-  // const height = width;
-  // // if (width * height !== numPixels) {
-  // //   throw new Error('invalid point cloud dimensions');
-  // // }
-
-  const scaleFactor = 1 / width;
-
+function pointCloudArrayBufferToPositionAttributeArray(
+  arrayBuffer,
+  width,
+  height,
+  scaleFactor,
+  float32Array,
+  pixelStride = 1,
+) { // result in float32Array
   const dataView = new DataView(arrayBuffer);
-  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride, j += 3) {
+  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
+    if (pixelStride !== 1) {
+      const i2 = i / pointcloudStride;
+      const sx = i2 % width;
+      const sy = Math.floor(i2 / width);
+      if (sx % pixelStride !== 0 || sy % pixelStride !== 0) {
+        continue;
+      }
+    }
+
+    // if (j >= float32Array.length) {
+    //   console.warn('point cloud array buffer overflow', float32Array.length, arrayBuffer.byteLength, arrayBuffer.byteLength / (pointcloudStride * pixelStride));
+    //   console.log('fail', arrayBuffer.byteLength / (pointcloudStride * pixelStride) * 3, float32Array.length);
+    //   debugger;
+    // }
+
     let x = dataView.getFloat32(i + 0, true);
     let y = dataView.getFloat32(i + 4, true);
     let z = dataView.getFloat32(i + 8, true);
@@ -33,13 +46,37 @@ export function pointCloudArrayBufferToPositionAttributeArray(arrayBuffer, width
     float32Array[j + 0] = x;
     float32Array[j + 1] = y;
     float32Array[j + 2] = z;
+
+    j += 3;
   }
 }
-export function pointCloudArrayBufferToGeometry(arrayBuffer, width, height) {
-  const widthSegments = width - 1;
-  const heightSegments = height - 1;
+export function pointCloudArrayBufferToGeometry(arrayBuffer, width, height, pixelStride = 1) {
+  // check that pixelStride is a power of 2
+  if (pixelStride & (pixelStride - 1)) {
+    throw new Error('pixelStride must be a power of 2');
+  }
+
+  const scaleFactor = 1 / width;
+  
+  const width2 = width / pixelStride;
+  const height2 = height / pixelStride;
+
+  // check that width and height are whole
+  if (width2 % 1 !== 0 || height2 % 1 !== 0) {
+    throw new Error('width and height must be whole after division by pixelStride');
+  }
+
+  const widthSegments = width2 - 1;
+  const heightSegments = height2 - 1;
   let geometry = new THREE.PlaneGeometry(1, 1, widthSegments, heightSegments);
-  pointCloudArrayBufferToPositionAttributeArray(arrayBuffer, width, height, geometry.attributes.position.array);
+  pointCloudArrayBufferToPositionAttributeArray(
+    arrayBuffer,
+    width,
+    height,
+    scaleFactor,
+    geometry.attributes.position.array,
+    pixelStride,
+  );
   return geometry;
 }
 
@@ -200,7 +237,14 @@ export const getGepthFloatsFromGeometryPositions = geometryPositions => {
 };
 export const getDepthFloatsFromPointCloud = (pointCloudArrayBuffer, width, height) => {
   const geometryPositions = new Float32Array(width * height * 3);
-  pointCloudArrayBufferToPositionAttributeArray(pointCloudArrayBuffer, width, height, geometryPositions);
+  const scaleFactor = 1 / width;
+  pointCloudArrayBufferToPositionAttributeArray(
+    pointCloudArrayBuffer,
+    width,
+    height,
+    scaleFactor,
+    geometryPositions,
+  );
   return getGepthFloatsFromGeometryPositions(geometryPositions);
 };
 export const getDepthFloatsFromIndexedGeometry = geometry => getGepthFloatsFromGeometryPositions(geometry.attributes.position.array);

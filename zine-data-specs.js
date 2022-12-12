@@ -10,6 +10,7 @@ export const layer0Specs = [
 export const layer1Specs = [
   'resolution',
   'segmentMask',
+  'cameraJson',
   'pointCloudHeaders',
   'pointCloud',
   'planesJson',

@@ -250,104 +250,6 @@ class FloorNetMesh extends THREE.Mesh {
 
 //
 
-const _getFloorTransform = (() => {
-  const localVector = new THREE.Vector3();
-  const localVector2 = new THREE.Vector3();
-  const localQuaternion = new THREE.Quaternion();
-  const localQuaternion2 = new THREE.Quaternion();
-
-  return ({
-    planeSpecs,
-    firstFloorPlaneIndex,
-  }) => {
-    if (firstFloorPlaneIndex !== -1) {
-      const labelSpec = planeSpecs.labels[firstFloorPlaneIndex];
-      const normal = localVector.fromArray(labelSpec.normal);
-      const center = localVector2.fromArray(labelSpec.center);
-      
-      const position = center.clone();
-      const quaternion = localQuaternion;
-      normalToQuaternion(normal, quaternion, backwardVector)
-        .multiply(localQuaternion2.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2));
-
-      return {
-        position,
-        quaternion,
-      };
-    } else {
-      return {
-        position,
-        quaternion,
-      };
-    }
-  };
-})();
-const _getCandidateTransforms = (() => {
-  const localVector = new THREE.Vector3();
-  const localVector2 = new THREE.Vector3();
-  const localVector3 = new THREE.Vector3();
-  const localQuaternion = new THREE.Quaternion();
-  const localQuaternion2 = new THREE.Quaternion();
-  const localMatrix = new THREE.Matrix4();
-  
-  return ({
-    portalLocations,
-    firstFloorPlaneIndex,
-    floorTransform,
-    planeSpecs,
-    n = 1
-  }) => {
-    const rng = alea('avatars');
-    const candidatePortalLocations = portalLocations.slice();
-
-    const result = Array(n);
-    for (let i = 0; i < n && candidatePortalLocations.length > 0; i++) {
-      let position;
-      let quaternion;
-
-      // position
-      const portalLocation = candidatePortalLocations.splice(Math.floor(rng() * candidatePortalLocations.length), 1)[0];
-      position = new THREE.Vector3().fromArray(portalLocation);
-
-      // quaternion
-      const lookCandidateLocations = (firstFloorPlaneIndex !== -1 ? [
-        floorTransform.position,
-      ] : [])
-        .concat(candidatePortalLocations.map(portalLocation => {
-          return new THREE.Vector3().fromArray(portalLocation);
-        }));
-      if (lookCandidateLocations.length > 0) {
-        const lookCandidateLocation = lookCandidateLocations[Math.floor(rng() * lookCandidateLocations.length)];
-        // match up vector to first plane
-        const up = localVector2.set(0, 1, 0);
-        if (firstFloorPlaneIndex !== -1) {
-          const labelSpec = planeSpecs.labels[firstFloorPlaneIndex];
-          const normal = localVector3.fromArray(labelSpec.normal);
-          normalToQuaternion(normal, localQuaternion, backwardVector)
-            .multiply(localQuaternion2.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2))
-          up.applyQuaternion(localQuaternion);
-        }
-        quaternion = new THREE.Quaternion().setFromRotationMatrix(
-          localMatrix.lookAt(
-            position,
-            lookCandidateLocation,
-            up
-          )
-        );
-      } else {
-        quaternion = new THREE.Quaternion();
-      }
-      result[i] = {
-        position,
-        quaternion,
-      };
-    }
-    return result;
-  };
-})();
-
-//
-
 export class ZineRenderer {
   constructor({
     panel,
@@ -368,8 +270,12 @@ export class ZineRenderer {
     const firstFloorPlaneIndex = layer1.getData('firstFloorPlaneIndex');
     const floorNetDepths = layer1.getData('floorNetDepths');
     const floorNetCameraJson = layer1.getData('floorNetCameraJson');
-    const predictedHeight = layer1.getData('predictedHeight');
+    const floorPlaneLocation = layer1.getData('floorPlaneLocation');
+    const cameraEntranceLocation = layer1.getData('cameraEntranceLocation');
+    const entranceExitLocations = layer1.getData('entranceExitLocations');
     const portalLocations = layer1.getData('portalLocations');
+    const candidateLocations = layer1.getData('candidateLocations');
+    const predictedHeight = layer1.getData('predictedHeight');
 
     // camera
     this.camera = makeDefaultCamera();
@@ -410,22 +316,57 @@ export class ZineRenderer {
       floorNetCamera,
     });
 
-    // transforms
-    const floorTransform = _getFloorTransform({
-      planeSpecs,
-      firstFloorPlaneIndex,
-    });
-    this.floorTransform = floorTransform;
-
-    const candidateTransforms = _getCandidateTransforms({
+    console.log('got candidate locations', {
+      floorPlaneLocation,
+      cameraEntranceLocation,
+      entranceExitLocations,
       portalLocations,
-      firstFloorPlaneIndex,
-      floorTransform,
-      planeSpecs,
-      n: 2,
+      candidateLocations,
+      // predictedHeight,
     });
-    this.candidateTransforms = candidateTransforms;
 
-    this.portalLocations = portalLocations;
+    /* Object.defineProperties(this, {
+      portalTransforms: {
+        get() {
+          console.log('get portalTransforms');
+          debugger;
+        }
+      },
+      candidateTransforms: {
+        get() {
+          console.log('get candidateTransforms');
+          debugger;
+        }
+      }
+    }); */
+
+    // const cameraCandidateTransforms = _getCameraCandidateTransforms({
+    //   camera: this.camera,
+    // });
+
+    // const portalCandidateTransforms = _getPortalCandidateTransforms({
+    //   portalLocations,
+    //   firstFloorPlaneIndex,
+    //   floorTransform,
+    //   planeSpecs,
+    //   n: 2,
+    // });
+
+    // const {
+    //   portalTransforms,
+    //   candidateTransforms,
+    // } = _selectEntranceExitPortalTransforms({
+    //   portalCandidateTransforms,
+    // });
+    // this.portalTransforms = portalTransforms;
+    // this.candidateTransforms = candidateTransforms;
+
+    this.metadata = {
+      floorPlaneLocation,
+      cameraEntranceLocation,
+      entranceExitLocations,
+      portalLocations,
+      candidateLocations,
+    }
   }
 }

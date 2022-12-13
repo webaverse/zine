@@ -9,6 +9,9 @@ export const layer0Specs = [
 
 export const layer1Specs = [
   'resolution',
+  'position',
+  'quaternion',
+  'scale',
   'segmentMask',
   'cameraJson',
   'pointCloudHeaders',
@@ -30,7 +33,6 @@ export const layer1Specs = [
   'portalLocations',
   'candidateLocations',
   'predictedHeight',
-  'scale',
 ];
 
 //

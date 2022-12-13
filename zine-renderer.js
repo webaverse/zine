@@ -250,10 +250,12 @@ class FloorNetMesh extends THREE.Mesh {
 
 //
 
-export class ZineRenderer {
+export class ZineRenderer extends EventTarget {
   constructor({
     panel,
   }) {
+    super();
+
     const layer0 = panel.getLayer(0);
     const layer1 = panel.getLayer(1);
     const imgArrayBuffer = layer0.getData(mainImageKey);

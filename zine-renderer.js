@@ -278,17 +278,19 @@ export class ZineRenderer extends EventTarget {
     const portalLocations = layer1.getData('portalLocations');
     const candidateLocations = layer1.getData('candidateLocations');
     const predictedHeight = layer1.getData('predictedHeight');
+    const scale = layer1.getData('scale');
+
+    // scene
+    const scene = new THREE.Scene();
+    scene.scale.setScalar(scale);
+    scene.autoUpdate = false;
+    this.scene = scene;
 
     // camera
-    this.camera = makeDefaultCamera();
+    const camera = makeDefaultCamera();
+    this.camera = camera;
     this.camera.fov = Number(pointCloudHeaders['x-fov']);
     this.camera.updateProjectionMatrix();
-
-    // floor net camera
-    const floorNetCamera = setOrthographicCameraFromJson(
-      new THREE.OrthographicCamera(),
-      floorNetCameraJson
-    );
 
     // scene mesh
     const sceneMesh = new SceneMesh({
@@ -301,6 +303,7 @@ export class ZineRenderer extends EventTarget {
       portalSpecs,
       firstFloorPlaneIndex,
     });
+    this.scene.add(sceneMesh);
     this.sceneMesh = sceneMesh;
 
     // scene physics mesh
@@ -309,15 +312,24 @@ export class ZineRenderer extends EventTarget {
       width: resolution[0],
       height: resolution[1],
     });
+    this.scene.add(scenePhysicsMesh);
     this.scenePhysicsMesh = scenePhysicsMesh;
 
     // floor net mesh
     const floorNetMesh = new FloorNetMesh();
-    this.floorNetMesh = floorNetMesh;
-    this.floorNetMesh.setGeometry({
+    const floorNetCamera = setOrthographicCameraFromJson(
+      new THREE.OrthographicCamera(),
+      floorNetCameraJson
+    );
+    floorNetMesh.setGeometry({
       floorNetDepths,
       floorNetCamera,
     });
+    this.scene.add(floorNetMesh);
+    this.floorNetMesh = floorNetMesh;
+
+    // update transforms
+    this.scene.updateMatrixWorld();
 
     // metadata
     this.metadata = {
@@ -326,6 +338,15 @@ export class ZineRenderer extends EventTarget {
       entranceExitLocations,
       portalLocations,
       candidateLocations,
-    }
+    };
+  }
+  getScale() {
+    return this.scene.scale.x;
+  }
+  setScale(scale) {
+    this.scene.scale.setScalar(scale);
+    this.scene.updateMatrixWorld();
+
+    this.dispatchEvent(new MessageEvent('transformchange'));
   }
 }

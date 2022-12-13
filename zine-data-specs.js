@@ -24,8 +24,12 @@ export const layer1Specs = [
   'floorResolution',
   'floorNetDepths',
   'floorNetCameraJson',
-  'predictedHeight',
+  'floorPlaneLocation',
+  'cameraEntranceLocation',
+  'entranceExitLocations',
   'portalLocations',
+  'candidateLocations',
+  'predictedHeight',
 ];
 
 //

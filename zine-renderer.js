@@ -7,7 +7,7 @@ import {
 } from './zine-data-specs.js';
 import {
   makeDefaultCamera,
-  normalToQuaternion,
+  // normalToQuaternion,
 } from './zine-utils.js';
 import {
   // getDepthFloatsFromIndexedGeometry,
@@ -301,6 +301,7 @@ export class ZineRenderer {
     });
     this.sceneMesh = sceneMesh;
 
+    // scene physics mesh
     const scenePhysicsMesh = new ScenePhysicsMesh({
       pointCloudArrayBuffer,
       width: resolution[0],
@@ -316,51 +317,7 @@ export class ZineRenderer {
       floorNetCamera,
     });
 
-    console.log('got candidate locations', {
-      floorPlaneLocation,
-      cameraEntranceLocation,
-      entranceExitLocations,
-      portalLocations,
-      candidateLocations,
-      // predictedHeight,
-    });
-
-    /* Object.defineProperties(this, {
-      portalTransforms: {
-        get() {
-          console.log('get portalTransforms');
-          debugger;
-        }
-      },
-      candidateTransforms: {
-        get() {
-          console.log('get candidateTransforms');
-          debugger;
-        }
-      }
-    }); */
-
-    // const cameraCandidateTransforms = _getCameraCandidateTransforms({
-    //   camera: this.camera,
-    // });
-
-    // const portalCandidateTransforms = _getPortalCandidateTransforms({
-    //   portalLocations,
-    //   firstFloorPlaneIndex,
-    //   floorTransform,
-    //   planeSpecs,
-    //   n: 2,
-    // });
-
-    // const {
-    //   portalTransforms,
-    //   candidateTransforms,
-    // } = _selectEntranceExitPortalTransforms({
-    //   portalCandidateTransforms,
-    // });
-    // this.portalTransforms = portalTransforms;
-    // this.candidateTransforms = candidateTransforms;
-
+    // metadata
     this.metadata = {
       floorPlaneLocation,
       cameraEntranceLocation,

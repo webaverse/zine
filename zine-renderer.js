@@ -261,6 +261,9 @@ export class ZineRenderer extends EventTarget {
     const layer1 = panel.getLayer(1);
     const imgArrayBuffer = layer0.getData(mainImageKey);
     const resolution = layer1.getData('resolution');
+    const position = layer1.getData('position');
+    const quaternion = layer1.getData('quaternion');
+    const scale = layer1.getData('scale');
     const segmentMask = layer1.getData('segmentMask');
     const pointCloudHeaders = layer1.getData('pointCloudHeaders');
     const pointCloudArrayBuffer = layer1.getData('pointCloud');
@@ -279,13 +282,20 @@ export class ZineRenderer extends EventTarget {
     const portalLocations = layer1.getData('portalLocations');
     const candidateLocations = layer1.getData('candidateLocations');
     const predictedHeight = layer1.getData('predictedHeight');
-    const scale = layer1.getData('scale');
 
     // scene
     const scene = new THREE.Scene();
-    scene.scale.setScalar(scale);
     scene.autoUpdate = false;
     this.scene = scene;
+
+    // scale scene
+    const transformScene = new THREE.Scene();
+    transformScene.autoUpdate = false;
+    transformScene.position.fromArray(position);
+    transformScene.quaternion.fromArray(quaternion);
+    transformScene.scale.fromArray(scale);
+    this.scene.add(transformScene);
+    this.transformScene = transformScene;
 
     // camera
     const camera = makeDefaultCamera();
@@ -304,7 +314,7 @@ export class ZineRenderer extends EventTarget {
       portalSpecs,
       firstFloorPlaneIndex,
     });
-    this.scene.add(sceneMesh);
+    this.transformScene.add(sceneMesh);
     this.sceneMesh = sceneMesh;
 
     // scene physics mesh
@@ -313,7 +323,7 @@ export class ZineRenderer extends EventTarget {
       width: resolution[0],
       height: resolution[1],
     });
-    this.scene.add(scenePhysicsMesh);
+    this.transformScene.add(scenePhysicsMesh);
     this.scenePhysicsMesh = scenePhysicsMesh;
 
     // floor net mesh
@@ -326,7 +336,7 @@ export class ZineRenderer extends EventTarget {
       floorNetDepths,
       floorNetCamera,
     });
-    this.scene.add(floorNetMesh);
+    this.transformScene.add(floorNetMesh);
     this.floorNetMesh = floorNetMesh;
 
     // update transforms
@@ -340,16 +350,50 @@ export class ZineRenderer extends EventTarget {
       portalLocations,
       candidateLocations,
     };
+
+    this.#listen();
+  }
+  #listen() {
+    const layer1 = this.panel.getLayer(1);
+    layer1.addEventListener('update', e => {
+      console.log('layer 1 got update event', e);
+
+      const {key, value, keyPath} = e.data;
+      const transformKeys = [
+        'position',
+        'quaternion',
+        'scale',
+      ];
+      if (transformKeys.includes(key)) {
+        this.updateTransform();
+      }
+    });
   }
   getScale() {
-    return this.scene.scale.x;
+    const layer1 = this.panel.getLayer(1);
+    const scale = layer1.getData('scale');
+    return scale[0];
   }
   setScale(scale) {
-    this.scene.scale.setScalar(scale);
-    this.scene.updateMatrixWorld();
-
     const layer1 = this.panel.getLayer(1);
-    layer1.setData('scale', scale);
+    layer1.setData('scale', [scale, scale, scale]);
+  }
+  updateTransform() {
+    const layer1 = this.panel.getLayer(1);
+    const position = layer1.getData('position');
+    const quaternion = layer1.getData('quaternion');
+    const scale = layer1.getData('scale');
+    
+    this.transformScene.position.fromArray(position);
+    this.transformScene.quaternion.fromArray(quaternion);
+    this.transformScene.scale.fromArray(scale);
+    this.transformScene.updateMatrixWorld();
+
+    console.log('update transform', {
+      position,
+      quaternion,
+      scale,
+    });
 
     this.dispatchEvent(new MessageEvent('transformchange'));
   }

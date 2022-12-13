@@ -114,12 +114,12 @@ export class ZineStoryboard extends EventTarget {
   }
   #listen() {
     const onadd = e => {
-      console.log('zine panel add event', e.data.keyPath, this.prefix);
+      // console.log('zine panel add event', e.data.keyPath, this.prefix);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
         console.log('bail');
         return;
       } else {
-        console.log('continue');
+        // console.log('continue');
       }
 
       const {

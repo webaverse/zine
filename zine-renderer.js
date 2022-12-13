@@ -348,6 +348,9 @@ export class ZineRenderer extends EventTarget {
     this.scene.scale.setScalar(scale);
     this.scene.updateMatrixWorld();
 
+    const layer1 = this.panel.getLayer(1);
+    layer1.setData('scale', scale);
+
     this.dispatchEvent(new MessageEvent('transformchange'));
   }
 }

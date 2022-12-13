@@ -256,6 +256,7 @@ export class ZineRenderer extends EventTarget {
   }) {
     super();
 
+    this.panel = panel;
     const layer0 = panel.getLayer(0);
     const layer1 = panel.getLayer(1);
     const imgArrayBuffer = layer0.getData(mainImageKey);

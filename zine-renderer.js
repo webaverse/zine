@@ -27,13 +27,21 @@ import {
 //
 
 // const upVector = new THREE.Vector3(0, 1, 0);
-const backwardVector = new THREE.Vector3(0, 0, 1);
+// const backwardVector = new THREE.Vector3(0, 0, 1);
+const oneVector = new THREE.Vector3(1, 1, 1);
+const y180Matrix = new THREE.Matrix4().makeRotationY(Math.PI);
 
 const fakeMaterial = new THREE.MeshBasicMaterial({
   color: 0x0000FF,
   transparent: true,
   opacity: 0.2,
 });
+
+//
+
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
 
 //
 
@@ -392,12 +400,82 @@ export class ZineRenderer extends EventTarget {
     this.transformScene.scale.fromArray(scale);
     this.transformScene.updateMatrixWorld();
 
-    console.log('update transform', {
-      position,
-      quaternion,
-      scale,
-    });
+    // console.log('update transform', {
+    //   position,
+    //   quaternion,
+    //   scale,
+    // });
 
     this.dispatchEvent(new MessageEvent('transformchange'));
+  }
+  connect(targetZineRenderer, exitIndex = 1, entranceIndex = 0) {
+    const exitLocation = this.metadata.entranceExitLocations[exitIndex];
+    // if (!exitLocation) {
+    //   console.warn('no exit location', exitIndex);
+    //   debugger;
+    // }
+    const exitMatrix = new THREE.Matrix4().compose(
+      new THREE.Vector3().fromArray(exitLocation.position),
+      new THREE.Quaternion().fromArray(exitLocation.quaternion),
+      oneVector
+    );
+    const exitMatrixWorld = exitMatrix.clone()
+      .premultiply(this.transformScene.matrixWorld);
+    exitMatrixWorld.decompose(
+      localVector,
+      localQuaternion,
+      localVector2
+    );
+    exitMatrixWorld.compose(
+      localVector,
+      localQuaternion,
+      oneVector
+    );
+
+    const entranceLocation = targetZineRenderer.metadata.entranceExitLocations[entranceIndex];
+    // if (!entranceLocation) {
+    //   console.warn('no entrance location', entranceIndex);
+    //   debugger;
+    // }
+    const entranceMatrix = new THREE.Matrix4().compose(
+      localVector.fromArray(entranceLocation.position),
+      localQuaternion.fromArray(entranceLocation.quaternion),
+      oneVector
+    );
+    const entranceMatrixWorld = entranceMatrix.clone()
+      .premultiply(targetZineRenderer.transformScene.matrixWorld);
+      entranceMatrixWorld.decompose(
+      localVector,
+      localQuaternion,
+      localVector2
+    );
+    entranceMatrixWorld.compose(
+      localVector,
+      localQuaternion,
+      oneVector
+    );
+    const entranceMatrixWorldInverse = entranceMatrixWorld.clone()
+      .invert();
+
+    // console.log('entrance exit locations', {
+    //   exitLocation,
+    //   entranceLocation,
+    // });
+
+    // console.log('original quaternion', targetZineRenderer.scene.quaternion.toArray());
+
+    // undo the target entrance transform
+    // then, apply the exit transform
+    targetZineRenderer.scene.matrix
+      .premultiply(entranceMatrixWorldInverse)
+      .premultiply(y180Matrix)
+      .premultiply(exitMatrixWorld)
+    targetZineRenderer.scene.matrix
+      .decompose(
+        targetZineRenderer.scene.position,
+        targetZineRenderer.scene.quaternion,
+        targetZineRenderer.scene.scale
+      );
+    targetZineRenderer.scene.updateMatrixWorld();
   }
 }

@@ -145,6 +145,33 @@ export function depthFloat32ArrayToGeometry(
 
 //
 
+export function getDepthFloat32ArrayWorldPosition(
+  depthFloat32Array,
+  x, // 0..1
+  y, // 0..1
+  width,
+  height,
+  camera,
+  target
+) { // result in target
+  // compute the snapped pixel index
+  let px = Math.floor(x * width);
+  let py = Math.floor(y * height);
+
+  px = Math.min(Math.max(px, 0), width - 1);
+  py = Math.min(Math.max(py, 0), height - 1);
+
+  const i = py * width + px;
+  y = 1 - y;
+
+  const viewZ = depthFloat32Array[i];
+  const worldPoint = setCameraViewPositionFromViewZ(x, y, viewZ, camera, target);
+  worldPoint.applyMatrix4(camera.matrixWorld);
+  return target;
+}
+
+//
+
 export function depthFloat32ArrayToOrthographicPositionAttributeArray(
   depthFloat32Array,
   width,

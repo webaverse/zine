@@ -111,9 +111,6 @@ export function depthFloat32ArrayToPositionAttributeArray(
   camera,
   float32Array,
 ) { // result in float32Array
-  // const numPixels = depthFloat32Array.length;
-  // const width = Math.sqrt(numPixels);
-  // const height = width;
   for (let i = 0; i < depthFloat32Array.length; i++) {
     const x = (i % width) / width;
     let y = Math.floor(i / width) / height;

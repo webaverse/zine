@@ -152,6 +152,7 @@ export function getDepthFloat32ArrayWorldPosition(
   width,
   height,
   camera,
+  scale,
   target
 ) { // result in target
   // compute the snapped pixel index
@@ -166,6 +167,7 @@ export function getDepthFloat32ArrayWorldPosition(
 
   const viewZ = depthFloat32Array[i];
   const worldPoint = setCameraViewPositionFromViewZ(x, y, viewZ, camera, target);
+  worldPoint.multiply(scale);
   worldPoint.applyMatrix4(camera.matrixWorld);
   return target;
 }

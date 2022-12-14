@@ -344,6 +344,9 @@ export class ZineRenderer extends EventTarget {
 
     // metadata
     this.metadata = {
+      position,
+      quaternion,
+      scale,
       floorPlaneLocation,
       cameraEntranceLocation,
       entranceExitLocations,

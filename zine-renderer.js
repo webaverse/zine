@@ -485,16 +485,26 @@ export class ZineRenderer extends EventTarget {
 
     // undo the target entrance transform
     // then, apply the exit transform
-    targetZineRenderer.scene.matrix
-      .premultiply(entranceMatrixWorldInverse)
+    const transformMatrix = new THREE.Matrix4()
+      .copy(entranceMatrixWorldInverse)
       .premultiply(y180Matrix)
       .premultiply(exitMatrixWorld)
     targetZineRenderer.scene.matrix
+      .premultiply(transformMatrix)
       .decompose(
         targetZineRenderer.scene.position,
         targetZineRenderer.scene.quaternion,
         targetZineRenderer.scene.scale
       );
     targetZineRenderer.scene.updateMatrixWorld();
+
+    targetZineRenderer.camera.matrix
+      .premultiply(transformMatrix)
+      .decompose(
+        targetZineRenderer.camera.position,
+        targetZineRenderer.camera.quaternion,
+        targetZineRenderer.camera.scale
+      );
+    targetZineRenderer.camera.updateMatrixWorld();
   }
 }

@@ -187,6 +187,9 @@ export class ZineStoryboard extends EventTarget {
   getPanels() {
     return this.#panels;
   }
+  getPanel(index) {
+    return this.#panels[index];
+  }
   addPanel() {
     const id = makeId();
     const keyPath = this.prefix.concat([id]);
@@ -194,13 +197,6 @@ export class ZineStoryboard extends EventTarget {
 
     const panel = this.#panels[this.#panels.length - 1];
     return panel;
-  }
-
-  getPanels() {
-    return this.#panels;
-  }
-  getPanel(index) {
-    return this.#panels[index];
   }
 
   removePanel(panel) {

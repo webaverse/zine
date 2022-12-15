@@ -1,13 +1,11 @@
 import * as THREE from 'three';
-import alea from 'alea';
+// import alea from 'alea';
 import {
   mainImageKey,
-  // promptKey,
-  // layer2Specs,
 } from './zine-data-specs.js';
 import {
+  // makePromise,
   makeDefaultCamera,
-  // normalToQuaternion,
 } from './zine-utils.js';
 import {
   // getDepthFloatsFromIndexedGeometry,
@@ -175,6 +173,20 @@ class SceneMesh extends THREE.Mesh {
       map.needsUpdate = true;
 
       sceneMesh.visible = true;
+
+      // sceneMesh.onBeforeRender = () => {
+      //   console.log('on before render');
+      // };
+      // material.onBeforeCompile = () => {
+      //   console.log('on before compile');
+      // };
+      // console.log('dispatch load 1');
+      this.dispatchEvent({
+        type: 'load',
+      });
+      // console.log('dispatch load 2');
+      // delete sceneMesh.onBeforeRender;
+      // delete material.onBeforeCompile;
     })();
   }
 }
@@ -264,6 +276,7 @@ export class ZineRenderer extends EventTarget {
   }) {
     super();
 
+    // members
     this.panel = panel;
     const layer0 = panel.getLayer(0);
     const layer1 = panel.getLayer(1);
@@ -292,13 +305,13 @@ export class ZineRenderer extends EventTarget {
     const predictedHeight = layer1.getData('predictedHeight');
 
     // scene
-    const scene = new THREE.Scene();
-    scene.autoUpdate = false;
+    const scene = new THREE.Object3D();
+    // scene.autoUpdate = false;
     this.scene = scene;
 
     // scale scene
-    const transformScene = new THREE.Scene();
-    transformScene.autoUpdate = false;
+    const transformScene = new THREE.Object3D();
+    // transformScene.autoUpdate = false;
     transformScene.position.fromArray(position);
     transformScene.quaternion.fromArray(quaternion);
     transformScene.scale.fromArray(scale);
@@ -323,6 +336,9 @@ export class ZineRenderer extends EventTarget {
       firstFloorPlaneIndex,
     });
     this.transformScene.add(sceneMesh);
+    sceneMesh.addEventListener('load', e => {
+      this.dispatchEvent(new MessageEvent('load'));
+    });
     this.sceneMesh = sceneMesh;
 
     // scene physics mesh
@@ -367,7 +383,7 @@ export class ZineRenderer extends EventTarget {
   #listen() {
     const layer1 = this.panel.getLayer(1);
     layer1.addEventListener('update', e => {
-      console.log('layer 1 got update event', e);
+      // console.log('layer 1 got update event', e);
 
       const {key, value, keyPath} = e.data;
       const transformKeys = [
@@ -393,6 +409,17 @@ export class ZineRenderer extends EventTarget {
 
     this.dispatchEvent(new MessageEvent('transformchange'));
   }
+  /* async waitForLoad() {
+    if (!this.loaded) {
+      const p = makePromise();
+      this.addEventListener('load', e => {
+        p.resolve();
+      }, {
+        once: true,
+      });
+      await p;
+    }
+  } */
   getScale() {
     const layer1 = this.panel.getLayer(1);
     const scale = layer1.getData('scale');

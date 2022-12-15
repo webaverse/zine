@@ -8,6 +8,20 @@ import {
 
 //
 
+// export const makePromise = () => {
+//   let resolve = null;
+//   let reject = null;
+//   const promise = new Promise((a, b) => {
+//     resolve = a;
+//     reject = b;
+//   });
+//   promise.resolve = resolve;
+//   promise.reject = reject;
+//   return promise;
+// }
+
+//
+
 export const makeRenderer = canvas => {
   const renderer = new THREE.WebGLRenderer({
     canvas,

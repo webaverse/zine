@@ -376,20 +376,11 @@ export class ZineRenderer extends EventTarget {
         'scale',
       ];
       if (transformKeys.includes(key)) {
-        this.updateTransform();
+        this.#syncTransformToData();
       }
     });
   }
-  getScale() {
-    const layer1 = this.panel.getLayer(1);
-    const scale = layer1.getData('scale');
-    return scale[0];
-  }
-  setScale(scale) {
-    const layer1 = this.panel.getLayer(1);
-    layer1.setData('scale', [scale, scale, scale]);
-  }
-  updateTransform() {
+  #syncTransformToData() { // update scene transform to match panel data
     const layer1 = this.panel.getLayer(1);
     const position = layer1.getData('position');
     const quaternion = layer1.getData('quaternion');
@@ -400,13 +391,16 @@ export class ZineRenderer extends EventTarget {
     this.transformScene.scale.fromArray(scale);
     this.transformScene.updateMatrixWorld();
 
-    // console.log('update transform', {
-    //   position,
-    //   quaternion,
-    //   scale,
-    // });
-
     this.dispatchEvent(new MessageEvent('transformchange'));
+  }
+  getScale() {
+    const layer1 = this.panel.getLayer(1);
+    const scale = layer1.getData('scale');
+    return scale[0];
+  }
+  setScale(scale) {
+    const layer1 = this.panel.getLayer(1);
+    layer1.setData('scale', [scale, scale, scale]);
   }
   connect(targetZineRenderer, exitIndex = 1, entranceIndex = 0) {
     const exitLocation = this.metadata.entranceExitLocations[exitIndex];
@@ -461,8 +455,6 @@ export class ZineRenderer extends EventTarget {
     //   exitLocation,
     //   entranceLocation,
     // });
-
-    // console.log('original quaternion', targetZineRenderer.scene.quaternion.toArray());
 
     // undo the target entrance transform
     // then, apply the exit transform

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {
   floorNetWorldSize,
@@ -46,6 +47,13 @@ export const makeGltfLoader = () => {
   dracoLoader.setDecoderPath('/three/draco/');
   gltfLoader.setDRACOLoader(dracoLoader);
   return gltfLoader;
+};
+
+//
+
+export const makeGltfExporter = () => {
+  const gltfExporter = new GLTFExporter();
+  return gltfExporter;
 };
 
 //

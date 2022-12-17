@@ -89,10 +89,10 @@ function checkEventKeypathPrefix(e, prefix) {
 function keyPathEquals(a, b) {
   return a.length === b.length && a.every((key, i) => key === b[i]);
 }
-function isKeyPathSub(prefix, keyPath) {
-  return prefix.length <= keyPath.length &&
-    prefix.every((key, i) => keyPath[i] === key);
-}
+// function isKeyPathSub(prefix, keyPath) {
+//   return prefix.length <= keyPath.length &&
+//     prefix.every((key, i) => keyPath[i] === key);
+// }
 
 export class ZineStoryboard extends EventTarget {
   constructor() {

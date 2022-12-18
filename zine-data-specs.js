@@ -12,7 +12,6 @@ export const layer1Specs = [
   'position',
   'quaternion',
   'scale',
-  'segmentMask',
   'cameraJson',
   'pointCloudHeaders',
   'pointCloud',

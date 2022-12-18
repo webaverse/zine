@@ -6,7 +6,7 @@ const localVector = new THREE.Vector3();
 
 //
 
-const pointcloudStride = 4 + 4 + 4 + 1 + 1 + 1;
+const pointCloudStride = 4 + 4 + 4;
 
 //
 
@@ -19,21 +19,15 @@ function pointCloudArrayBufferToPositionAttributeArray(
   pixelStride = 1,
 ) { // result in float32Array
   const dataView = new DataView(arrayBuffer);
-  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
+  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointCloudStride) {
     if (pixelStride !== 1) {
-      const i2 = i / pointcloudStride;
+      const i2 = i / pointCloudStride;
       const sx = i2 % width;
       const sy = Math.floor(i2 / width);
       if (sx % pixelStride !== 0 || sy % pixelStride !== 0) {
         continue;
       }
     }
-
-    // if (j >= float32Array.length) {
-    //   console.warn('point cloud array buffer overflow', float32Array.length, arrayBuffer.byteLength, arrayBuffer.byteLength / (pointcloudStride * pixelStride));
-    //   console.log('fail', arrayBuffer.byteLength / (pointcloudStride * pixelStride) * 3, float32Array.length);
-    //   debugger;
-    // }
 
     let x = dataView.getFloat32(i + 0, true);
     let y = dataView.getFloat32(i + 4, true);
@@ -296,7 +290,7 @@ export const snapPointCloudToCamera = (pointCloudArrayBuffer, width, height, cam
 
   const scaleFactor = 1 / width;
   const dataView = new DataView(pointCloudArrayBuffer);
-  for (let i = 0; i < pointCloudArrayBuffer.byteLength; i += pointcloudStride) {
+  for (let i = 0; i < pointCloudArrayBuffer.byteLength; i += pointCloudStride) {
     let x = dataView.getFloat32(i + 0, true);
     let y = dataView.getFloat32(i + 4, true);
     let z = dataView.getFloat32(i + 8, true);

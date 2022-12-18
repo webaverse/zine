@@ -273,6 +273,7 @@ class FloorNetMesh extends THREE.Mesh {
 export class ZineRenderer extends EventTarget {
   constructor({
     panel,
+    alignFloor = false,
   }) {
     super();
 
@@ -362,6 +363,18 @@ export class ZineRenderer extends EventTarget {
     });
     this.transformScene.add(floorNetMesh);
     this.floorNetMesh = floorNetMesh;
+    
+    if (alignFloor) {
+      const floorInverseQuaternion = localQuaternion
+        .fromArray(floorPlaneLocation.quaternion)
+        .invert();
+
+      scene.quaternion.copy(floorInverseQuaternion);
+      scene.updateMatrixWorld();
+      
+      camera.quaternion.copy(floorInverseQuaternion);
+      camera.updateMatrixWorld();
+    }
 
     // update transforms
     this.scene.updateMatrixWorld();

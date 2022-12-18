@@ -137,11 +137,8 @@ class SceneMesh extends THREE.Mesh {
       height,
     );
     geometry.setAttribute('segment', new THREE.BufferAttribute(segmentSpecs.array, 1));
-    geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentSpecs.colorArray, 3));
     geometry.setAttribute('plane', new THREE.BufferAttribute(planeSpecs.array, 1));
-    geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeSpecs.colorArray, 3));
     // geometry.setAttribute('portal', new THREE.BufferAttribute(portalSpecs.array, 1));
-    geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalSpecs.colorArray, 3));
     const indexedGeometry = geometry;
     geometry = geometry.toNonIndexed();
     decorateGeometryTriangleIds(geometry);
@@ -206,11 +203,8 @@ class ScenePhysicsMesh extends THREE.Mesh {
       physicsPixelStride,
     );
     // geometry.setAttribute('segment', new THREE.BufferAttribute(segmentSpecs.array, 1));
-    // geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentSpecs.colorArray, 3));
     // geometry.setAttribute('plane', new THREE.BufferAttribute(planeSpecs.array, 1));
-    // geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeSpecs.colorArray, 3));
     // // geometry.setAttribute('portal', new THREE.BufferAttribute(portalSpecs.array, 1));
-    // geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalSpecs.colorArray, 3));
     // const indexedGeometry = geometry;
     // geometry = geometry.toNonIndexed();
     // decorateGeometryTriangleIds(geometry);

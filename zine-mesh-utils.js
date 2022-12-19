@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import {
+  depthFloat32ArrayToOrthographicGeometry,
+} from './zine-geometry-utils.js';
+import {
   floorNetWorldSize,
   floorNetWorldDepth,
   floorNetResolution,

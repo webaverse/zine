@@ -1,12 +1,11 @@
 import * as THREE from 'three';
+import {
+  pointcloudStride,
+} from './zine-constants.js';
 
 //
 
 const localVector = new THREE.Vector3();
-
-//
-
-const pointcloudStride = 4 + 4 + 4 + 1 + 1 + 1;
 
 //
 

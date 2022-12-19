@@ -23,16 +23,10 @@ function pointCloudArrayBufferToPositionAttributeArray(
       const i2 = i / pointcloudStride;
       const sx = i2 % width;
       const sy = Math.floor(i2 / width);
-      if (sx % pixelStride !== 0 || sy % pixelStride !== 0) {
+      if (sx % pixelStride !== 0 || sy % pixelStride !== 0) { // skip non-stride points
         continue;
       }
     }
-
-    // if (j >= float32Array.length) {
-    //   console.warn('point cloud array buffer overflow', float32Array.length, arrayBuffer.byteLength, arrayBuffer.byteLength / (pointcloudStride * pixelStride));
-    //   console.log('fail', arrayBuffer.byteLength / (pointcloudStride * pixelStride) * 3, float32Array.length);
-    //   debugger;
-    // }
 
     let x = dataView.getFloat32(i + 0, true);
     let y = dataView.getFloat32(i + 4, true);

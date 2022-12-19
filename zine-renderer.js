@@ -19,6 +19,7 @@ import {
 } from './zine-camera-utils.js';
 import {
   floorNetPixelSize,
+  pointcloudStride,
   physicsPixelStride,
 } from './zine-constants.js';
 
@@ -198,6 +199,7 @@ class ScenePhysicsMesh extends THREE.Mesh {
     pointCloudArrayBuffer,
     width,
     height,
+    segmentSpecs,
   }) {
     let geometry = pointCloudArrayBufferToGeometry(
       pointCloudArrayBuffer,
@@ -205,15 +207,34 @@ class ScenePhysicsMesh extends THREE.Mesh {
       height,
       physicsPixelStride,
     );
-    // geometry.setAttribute('segment', new THREE.BufferAttribute(segmentSpecs.array, 1));
-    // geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentSpecs.colorArray, 3));
-    // geometry.setAttribute('plane', new THREE.BufferAttribute(planeSpecs.array, 1));
-    // geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeSpecs.colorArray, 3));
-    // // geometry.setAttribute('portal', new THREE.BufferAttribute(portalSpecs.array, 1));
-    // geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalSpecs.colorArray, 3));
-    // const indexedGeometry = geometry;
-    // geometry = geometry.toNonIndexed();
-    // decorateGeometryTriangleIds(geometry);
+
+    // maintain segmentSpecs.array -> 'segments' attribute
+    const segments = new segmentSpecs.array.constructor( // Float32Array
+      segmentSpecs.array.length / (physicsPixelStride * physicsPixelStride)
+    );
+    // if (segments.length * 3 !== geometry.attributes.position.array.length) {
+    //   console.log('mismatch', segments.length, geometry.attributes.position.array.length);
+    //   debugger;
+    // }
+    const arrayBuffer = pointCloudArrayBuffer;
+    const pixelStride = physicsPixelStride;
+    for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
+      if (pixelStride !== 1) {
+        const i2 = i / pointcloudStride;
+        const sx = i2 % width;
+        const sy = Math.floor(i2 / width);
+        if (sx % pixelStride !== 0 || sy % pixelStride !== 0) { // skip non-stride points
+          continue;
+        }
+      }
+
+      const s = segmentSpecs.array[i / pointcloudStride];
+      segments[j] = s;
+
+      j++;
+    }
+    geometry.setAttribute('segment', new THREE.BufferAttribute(segments, 1));
+
     super(geometry, fakeMaterial);
 
     const scenePhysicsMesh = this;
@@ -304,6 +325,7 @@ export class ZineRenderer extends EventTarget {
     const portalLocations = layer1.getData('portalLocations');
     const candidateLocations = layer1.getData('candidateLocations');
     const predictedHeight = layer1.getData('predictedHeight');
+    const paths = layer1.getData('paths');
 
     // scene
     const scene = new THREE.Object3D();
@@ -347,6 +369,7 @@ export class ZineRenderer extends EventTarget {
       pointCloudArrayBuffer,
       width: resolution[0],
       height: resolution[1],
+      segmentSpecs,
     });
     this.transformScene.add(scenePhysicsMesh);
     this.scenePhysicsMesh = scenePhysicsMesh;
@@ -375,7 +398,7 @@ export class ZineRenderer extends EventTarget {
       camera.quaternion.copy(floorInverseQuaternion);
       camera.updateMatrixWorld();
     }
-
+ 
     // update transforms
     this.scene.updateMatrixWorld();
 
@@ -389,6 +412,7 @@ export class ZineRenderer extends EventTarget {
       entranceExitLocations,
       portalLocations,
       candidateLocations,
+      paths,
     };
 
     this.#listen();

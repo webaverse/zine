@@ -437,3 +437,26 @@ export const getDoubleSidedGeometry = geometry => {
   geometry2.setIndex(new THREE.BufferAttribute(newIndices, 1));
   return geometry2;
 };
+
+//
+
+export const getGeometryHeights = (geometry, width, height) => {
+  const heights = new Int16Array(geometry.attributes.position.array.length / 3);
+  let writeIndex = 0;
+  for (let dy = 0; dy < height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      const ax = dx;
+      const ay = height - 1 - dy;
+      // XXX this is WRONG!
+      // we should index by ay * width + ax
+      // however, because of a bug which computes this wrong, we have to do it this way
+      const readIndex = ax * width + ay;
+
+      const y = geometry.attributes.position.array[readIndex * 3 + 1];
+      heights[writeIndex] = Math.round(y / heightfieldScale);
+
+      writeIndex++;
+    }
+  }
+  return heights;
+};

@@ -440,7 +440,7 @@ export const getDoubleSidedGeometry = geometry => {
 
 //
 
-export const getGeometryHeights = (geometry, width, height) => {
+export const getGeometryHeights = (geometry, width, height, heightfieldScale) => {
   const heights = new Int16Array(geometry.attributes.position.array.length / 3);
   let writeIndex = 0;
   for (let dy = 0; dy < height; dy++) {

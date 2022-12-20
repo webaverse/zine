@@ -21,7 +21,7 @@ function pointCloudArrayBufferToPositionAttributeArray(
       const i2 = i / pointCloudPositionalStride;
       const sx = i2 % width;
       const sy = Math.floor(i2 / width);
-      if (sx % pixelStride !== 0 || sy % pixelStride !== 0) {
+      if (sx % pixelStride !== 0 || sy % pixelStride !== 0) { // skip non-stride points
         continue;
       }
     }
@@ -414,3 +414,42 @@ export const setCameraViewPositionFromOrthographicViewZ = (x, y, viewZ, camera, 
   target.z = worldPoint.z;
   return target;
 }
+
+export const getDoubleSidedGeometry = geometry => {
+  const geometry2 = geometry.clone();
+  // double-side the geometry
+  const indices = geometry2.index.array;
+  const newIndices = new indices.constructor(indices.length * 2);
+  newIndices.set(indices);
+  // the second set of indices is flipped
+  for (let i = 0; i < indices.length; i += 3) {
+    newIndices[indices.length + i + 0] = indices[i + 2];
+    newIndices[indices.length + i + 1] = indices[i + 1];
+    newIndices[indices.length + i + 2] = indices[i + 0];
+  }
+  geometry2.setIndex(new THREE.BufferAttribute(newIndices, 1));
+  return geometry2;
+};
+
+//
+
+export const getGeometryHeights = (geometry, width, height, heightfieldScale) => {
+  const heights = new Int16Array(geometry.attributes.position.array.length / 3);
+  let writeIndex = 0;
+  for (let dy = 0; dy < height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      const ax = dx;
+      const ay = height - 1 - dy;
+      // XXX this is WRONG!
+      // we should index by ay * width + ax
+      // however, because of a bug which computes this wrong, we have to do it this way
+      const readIndex = ax * width + ay;
+
+      const y = geometry.attributes.position.array[readIndex * 3 + 1];
+      heights[writeIndex] = Math.round(y / heightfieldScale);
+
+      writeIndex++;
+    }
+  }
+  return heights;
+};

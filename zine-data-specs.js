@@ -35,6 +35,7 @@ export const layer1Specs = [
   'portalLocations',
   'candidateLocations',
   'predictedHeight',
+  'edgeDepths',
   'paths',
 ];
 

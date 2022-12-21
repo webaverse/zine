@@ -1,6 +1,8 @@
+// export const idKey = 'id';
 export const mainImageKey = 'image';
 export const promptKey = 'prompt';
 export const layer0Specs = [
+  // idKey,
   mainImageKey,
   promptKey,
 ];

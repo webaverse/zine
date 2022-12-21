@@ -41,6 +41,7 @@ const fakeMaterial = new THREE.MeshBasicMaterial({
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
+const localMatrix = new THREE.Matrix4();
 
 //
 
@@ -325,7 +326,10 @@ export class ZineRenderer extends EventTarget {
     const portalLocations = layer1.getData('portalLocations');
     const candidateLocations = layer1.getData('candidateLocations');
     const predictedHeight = layer1.getData('predictedHeight');
+    const edgeDepths = layer1.getData('edgeDepths');
     const paths = layer1.getData('paths');
+
+    // const [width, height] = resolution;
 
     // scene
     const scene = new THREE.Object3D();
@@ -340,6 +344,71 @@ export class ZineRenderer extends EventTarget {
     transformScene.scale.fromArray(scale);
     this.scene.add(transformScene);
     this.transformScene = transformScene;
+
+    /* // render edge depths
+    {
+      const depthCubesGeometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
+      const depthCubesMaterial = new THREE.MeshBasicMaterial({
+        color: 0x0000FF,
+        // vertexColors: true,
+      });
+
+      // console.log('render edge depth resolution', width, height, resolution);
+      const depthCubesMesh = new THREE.InstancedMesh(
+        depthCubesGeometry,
+        depthCubesMaterial,
+        width + width + height + height
+      );
+      depthCubesMesh.count = 0;
+      depthCubesMesh.frustumCulled = false;
+      let index = 0;
+      [
+        edgeDepths.tops,
+        edgeDepths.bottoms,
+        edgeDepths.lefts,
+        edgeDepths.rights,
+      ].forEach(ps => {
+        for (let i = 0; i < ps.length; i++) {
+          const pointArray = ps[i];
+          localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2]);
+          depthCubesMesh.setMatrixAt(index++, localMatrix);
+          depthCubesMesh.count++;
+        }
+      });
+      depthCubesMesh.instanceMatrix.needsUpdate = true;
+      scene.add(depthCubesMesh);
+      depthCubesMesh.updateMatrixWorld();
+    }
+    {
+      const depthCubesGeometry2 = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      const depthCubesMaterial2 = new THREE.MeshBasicMaterial({
+        color: 0xFF0000,
+        // vertexColors: true,
+      });
+
+      // console.log('render edge depth resolution', width, height, resolution);
+      const depthCubesMesh2 = new THREE.InstancedMesh(
+        depthCubesGeometry2,
+        depthCubesMaterial2,
+        width + width + height + height
+      );
+      depthCubesMesh2.count = 0;
+      depthCubesMesh2.frustumCulled = false;
+      let index = 0;
+      [
+        edgeDepths.top,
+        edgeDepths.bottom,
+        edgeDepths.left,
+        edgeDepths.right,
+      ].forEach(pointArray => {
+        localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2]);
+        depthCubesMesh2.setMatrixAt(index++, localMatrix);
+        depthCubesMesh2.count++;
+      });
+      depthCubesMesh2.instanceMatrix.needsUpdate = true;
+      scene.add(depthCubesMesh2);
+      depthCubesMesh2.updateMatrixWorld();
+    } */
 
     // camera
     const camera = makeDefaultCamera();
@@ -412,6 +481,7 @@ export class ZineRenderer extends EventTarget {
       entranceExitLocations,
       portalLocations,
       candidateLocations,
+      edgeDepths,
       paths,
     };
 

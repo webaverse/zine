@@ -502,11 +502,11 @@ export class ZineRenderer extends EventTarget {
     );
     const entranceMatrixWorld = entranceMatrix.clone()
       .premultiply(targetZineRenderer.transformScene.matrixWorld);
-      entranceMatrixWorld.decompose(
-      localVector,
-      localQuaternion,
-      localVector2
-    );
+        entranceMatrixWorld.decompose(
+        localVector,
+        localQuaternion,
+        localVector2
+      );
     entranceMatrixWorld.compose(
       localVector,
       localQuaternion,

@@ -136,6 +136,32 @@ export function depthFloat32ArrayToGeometry(
 
 //
 
+export function getDepthFloat32ArrayWorldPositionPx(
+  depthFloat32Array,
+  px,
+  py,
+  width,
+  height,
+  camera,
+  scale,
+  target
+) {
+  px = Math.min(Math.max(px, 0), width - 1);
+  py = Math.min(Math.max(py, 0), height - 1);
+
+  let x = px / width;
+  let y = py / height;
+
+  const i = py * width + px;
+  y = 1 - y;
+
+  const viewZ = depthFloat32Array[i];
+  const worldPoint = setCameraViewPositionFromViewZ(x, y, viewZ, camera, target);
+  worldPoint.multiply(scale);
+  worldPoint.applyMatrix4(camera.matrixWorld);
+  return target;
+}
+
 export function getDepthFloat32ArrayWorldPosition(
   depthFloat32Array,
   x, // 0..1

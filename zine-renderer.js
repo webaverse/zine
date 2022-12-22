@@ -19,7 +19,7 @@ import {
 } from './zine-camera-utils.js';
 import {
   floorNetPixelSize,
-  pointcloudStride,
+  pointCloudPositionalStride,
   physicsPixelStride,
 } from './zine-constants.js';
 
@@ -219,9 +219,9 @@ class ScenePhysicsMesh extends THREE.Mesh {
     // }
     const arrayBuffer = pointCloudArrayBuffer;
     const pixelStride = physicsPixelStride;
-    for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
+    for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointCloudPositionalStride) {
       if (pixelStride !== 1) {
-        const i2 = i / pointcloudStride;
+        const i2 = i / pointCloudPositionalStride;
         const sx = i2 % width;
         const sy = Math.floor(i2 / width);
         if (sx % pixelStride !== 0 || sy % pixelStride !== 0) { // skip non-stride points
@@ -229,7 +229,7 @@ class ScenePhysicsMesh extends THREE.Mesh {
         }
       }
 
-      const s = segmentSpecs.array[i / pointcloudStride];
+      const s = segmentSpecs.array[i / pointCloudPositionalStride];
       segments[j] = s;
 
       j++;

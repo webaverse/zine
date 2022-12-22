@@ -1,7 +1,5 @@
 import * as THREE from 'three';
-import {
-  pointcloudStride,
-} from './zine-constants.js';
+import { pointCloudPositionalStride } from './zine-constants.js';
 
 //
 
@@ -18,9 +16,9 @@ function pointCloudArrayBufferToPositionAttributeArray(
   pixelStride = 1,
 ) { // result in float32Array
   const dataView = new DataView(arrayBuffer);
-  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
+  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointCloudPositionalStride) {
     if (pixelStride !== 1) {
-      const i2 = i / pointcloudStride;
+      const i2 = i / pointCloudPositionalStride;
       const sx = i2 % width;
       const sy = Math.floor(i2 / width);
       if (sx % pixelStride !== 0 || sy % pixelStride !== 0) { // skip non-stride points
@@ -314,8 +312,12 @@ export const snapPointCloudToCamera = (pointCloudArrayBuffer, width, height, cam
 
   const scaleFactor = 1 / width;
   const dataView = new DataView(pointCloudArrayBuffer);
-  for (let i = 0; i < pointCloudArrayBuffer.byteLength; i += pointcloudStride) {
-    let x = dataView.getFloat32(i + 0, true);
+  for (
+    let i = 0;
+    i < pointCloudArrayBuffer.byteLength;
+    i += pointCloudPositionalStride
+  ) {
+    let x = dataView.getFloat32(i    , true);
     let y = dataView.getFloat32(i + 4, true);
     let z = dataView.getFloat32(i + 8, true);
 
@@ -437,8 +439,6 @@ export const setCameraViewPositionFromOrthographicViewZ = (x, y, viewZ, camera, 
   target.z = worldPoint.z;
   return target;
 }
-
-//
 
 export const getDoubleSidedGeometry = geometry => {
   const geometry2 = geometry.clone();

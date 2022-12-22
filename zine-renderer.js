@@ -308,7 +308,6 @@ export class ZineRenderer extends EventTarget {
     const position = layer1.getData('position');
     const quaternion = layer1.getData('quaternion');
     const scale = layer1.getData('scale');
-    const segmentMask = layer1.getData('segmentMask');
     const pointCloudHeaders = layer1.getData('pointCloudHeaders');
     const pointCloudArrayBuffer = layer1.getData('pointCloud');
     const planesJson = layer1.getData('planesJson');

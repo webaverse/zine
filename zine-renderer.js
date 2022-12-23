@@ -676,17 +676,6 @@ export class ZineRenderer extends EventTarget {
 
     this.dispatchEvent(new MessageEvent('transformchange'));
   }
-  /* async waitForLoad() {
-    if (!this.loaded) {
-      const p = makePromise();
-      this.addEventListener('load', e => {
-        p.resolve();
-      }, {
-        once: true,
-      });
-      await p;
-    }
-  } */
   getScale() {
     const layer1 = this.panel.getLayer(1);
     const scale = layer1.getData('scale');
@@ -698,10 +687,6 @@ export class ZineRenderer extends EventTarget {
   }
   connect(targetZineRenderer, exitIndex = 1, entranceIndex = 0) {
     const exitLocation = this.metadata.entranceExitLocations[exitIndex];
-    // if (!exitLocation) {
-    //   console.warn('no exit location', exitIndex);
-    //   debugger;
-    // }
     const exitMatrix = new THREE.Matrix4().compose(
       new THREE.Vector3().fromArray(exitLocation.position),
       new THREE.Quaternion().fromArray(exitLocation.quaternion),

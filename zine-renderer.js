@@ -581,6 +581,18 @@ export class ZineRenderer extends EventTarget {
     });
     this.sceneMesh = sceneMesh;
 
+    // cap mesh
+    const capSceneMesh = new CapSceneMesh({
+      edgeDepths,
+      matrixWorld: transformScene.matrixWorld,
+      map: sceneMesh.material.uniforms.map.value,
+      width: resolution[0],
+      height: resolution[1],
+    });
+    capSceneMesh.frustumCulled = false;
+    this.transformScene.add(capSceneMesh);
+    this.capSceneMesh = capSceneMesh;
+
     // scene physics mesh
     const scenePhysicsMesh = new ScenePhysicsMesh({
       pointCloudArrayBuffer,

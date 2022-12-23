@@ -113,7 +113,7 @@ class SceneMaterial extends THREE.ShaderMaterial {
           }
         }
       `,
-    })
+    });
   }
 }
 class SceneMesh extends THREE.Mesh {

@@ -176,20 +176,150 @@ class SceneMesh extends THREE.Mesh {
 
       sceneMesh.visible = true;
 
-      // sceneMesh.onBeforeRender = () => {
-      //   console.log('on before render');
-      // };
-      // material.onBeforeCompile = () => {
-      //   console.log('on before compile');
-      // };
-      // console.log('dispatch load 1');
       this.dispatchEvent({
         type: 'load',
       });
-      // console.log('dispatch load 2');
-      // delete sceneMesh.onBeforeRender;
-      // delete material.onBeforeCompile;
     })();
+  }
+}
+
+//
+
+class CapSceneMesh extends THREE.Mesh {
+  constructor({
+    edgeDepths,
+    map,
+    width,
+    height,
+  }) {
+    const numTriangles = (
+      (width - 1) * 2 + (height - 1) * 2
+    );
+
+    // geometry
+    const geometry = new THREE.BufferGeometry();
+    // positions
+    const positions = new Float32Array(
+      (
+        width + width + height + height +
+        // one center point per triangle, for distinct uv coordinates
+        numTriangles
+      ) * 3
+    );
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    // uvs
+    const uvs = new Float32Array(positions.length / 3 * 2);
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    // indices
+    const indices = new Uint16Array(numTriangles * 3);
+    geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+    {
+      // fill in the center points
+      const centerPoint = new THREE.Vector3(0, 0, 0);
+      const centerPointVertexStartIndex = (width + width + height + height);
+      for (let i = 0; i < numTriangles; i++) {
+        positions[centerPointVertexStartIndex * 3 + i * 3 + 0] = centerPoint.x;
+        positions[centerPointVertexStartIndex * 3 + i * 3 + 1] = centerPoint.y;
+        positions[centerPointVertexStartIndex * 3 + i * 3 + 2] = centerPoint.z;
+        // uvs[centerPointVertexStartIndex * 2 + i * 2 + 0] = 0.5;
+        // uvs[centerPointVertexStartIndex * 2 + i * 2 + 1] = 0.5;
+      }
+
+      // fill in remaining points
+      let positionIndex = 0;
+      let uvIndex = 0;
+      let uvCenterPointIndex = (width + width + height + height) * 2;
+      let indexIndex = 0;
+      for (const edgeSpec of [
+        {
+          pointsArray: edgeDepths.tops,
+          uvStart: new THREE.Vector2(0, 0),
+          uvEnd: new THREE.Vector2(1, 0),
+          flip: false,
+        },
+        {
+          pointsArray: edgeDepths.bottoms,
+          uvStart: new THREE.Vector2(0, 1),
+          uvEnd: new THREE.Vector2(1, 1),
+          flip: true,
+        },
+        {
+          pointsArray: edgeDepths.lefts,
+          uvStart: new THREE.Vector2(0, 0),
+          uvEnd: new THREE.Vector2(0, 1),
+          flip: true,
+        },
+        {
+          pointsArray: edgeDepths.rights,
+          uvStart: new THREE.Vector2(1, 0),
+          uvEnd: new THREE.Vector2(1, 1),
+          flip: false,
+        },
+      ]) {
+        const {
+          pointsArray,
+          uvStart,
+          uvEnd,
+          flip,
+        } = edgeSpec;
+        // indices
+        // connect the points to the center point
+        for (let i = 0; i < pointsArray.length - 1; i++) {
+          const a = positionIndex / 3 + i;
+          const b = a + 1;
+          const c = centerPointVertexStartIndex + indexIndex / 3;
+          if (!flip) {
+            indices[indexIndex++] = a;
+            indices[indexIndex++] = b;
+            indices[indexIndex++] = c;
+          } else {
+            indices[indexIndex++] = a;
+            indices[indexIndex++] = c;
+            indices[indexIndex++] = b;
+          }
+        }
+
+        // positions
+        for (let i = 0; i < pointsArray.length; i++) {
+          const pointArray = pointsArray[i];
+          localVector.fromArray(pointArray)
+            // .applyMatrix4(matrixWorld)
+            .toArray(positions, positionIndex);
+          positionIndex += 3;
+        }
+
+        // uvs
+        for (let i = 0; i < pointsArray.length; i++) {
+          const uv = uvStart.clone()
+            .lerp(uvEnd, i / (pointsArray.length - 1));
+          uvs[uvIndex++] = uv.x;
+          uvs[uvIndex++] = 1 - uv.y;
+        }
+        // center point uvs
+        for (let i = 0; i < pointsArray.length - 1; i++) {
+          const uv = uvStart.clone()
+            .lerp(uvEnd, i / (pointsArray.length - 1));
+          uvs[uvCenterPointIndex++] = uv.x;
+          uvs[uvCenterPointIndex++] = 1 - uv.y;
+        }
+      }
+    }
+
+    // material
+    // const map = new THREE.Texture(image);
+    // map.needsUpdate = true;
+    // const material = new THREE.MeshBasicMaterial({
+    //   // color: 0x000000,
+    //   map,
+    //   side: THREE.DoubleSide,
+    // });
+    const material = new SceneMaterial({
+      map,
+    });
+
+    // mesh
+    super(geometry, material);
   }
 }
 

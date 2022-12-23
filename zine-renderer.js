@@ -459,7 +459,7 @@ export class ZineRenderer extends EventTarget {
     const edgeDepths = layer1.getData('edgeDepths');
     const paths = layer1.getData('paths');
 
-    // const [width, height] = resolution;
+    const [width, height] = resolution;
 
     // scene
     const scene = new THREE.Object3D();
@@ -472,10 +472,11 @@ export class ZineRenderer extends EventTarget {
     transformScene.position.fromArray(position);
     transformScene.quaternion.fromArray(quaternion);
     transformScene.scale.fromArray(scale);
+    transformScene.updateMatrixWorld();
     this.scene.add(transformScene);
     this.transformScene = transformScene;
 
-    /* // render edge depths
+    // render edge depths
     {
       const depthCubesGeometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
       const depthCubesMaterial = new THREE.MeshBasicMaterial({
@@ -500,7 +501,8 @@ export class ZineRenderer extends EventTarget {
       ].forEach(ps => {
         for (let i = 0; i < ps.length; i++) {
           const pointArray = ps[i];
-          localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2]);
+          localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2])
+            .premultiply(transformScene.matrixWorld);
           depthCubesMesh.setMatrixAt(index++, localMatrix);
           depthCubesMesh.count++;
         }
@@ -510,7 +512,7 @@ export class ZineRenderer extends EventTarget {
       depthCubesMesh.updateMatrixWorld();
     }
     {
-      const depthCubesGeometry2 = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      const depthCubesGeometry2 = new THREE.BoxGeometry(0.01, 0.01, 0.01);
       const depthCubesMaterial2 = new THREE.MeshBasicMaterial({
         color: 0xFF0000,
         // vertexColors: true,
@@ -530,15 +532,31 @@ export class ZineRenderer extends EventTarget {
         edgeDepths.bottom,
         edgeDepths.left,
         edgeDepths.right,
-      ].forEach(pointArray => {
-        localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2]);
+      ].forEach(point => {
+        // min
+        localMatrix.compose(
+          new THREE.Vector3().fromArray(point.min),
+          new THREE.Quaternion(),
+          new THREE.Vector3(4, 4, 4)
+        )
+          .premultiply(transformScene.matrixWorld);
+        depthCubesMesh2.setMatrixAt(index++, localMatrix);
+        depthCubesMesh2.count++;
+
+        // max
+        localMatrix.compose(
+          new THREE.Vector3().fromArray(point.max),
+          new THREE.Quaternion(),
+          new THREE.Vector3(2, 2, 2)
+        )
+          .premultiply(transformScene.matrixWorld);
         depthCubesMesh2.setMatrixAt(index++, localMatrix);
         depthCubesMesh2.count++;
       });
       depthCubesMesh2.instanceMatrix.needsUpdate = true;
       scene.add(depthCubesMesh2);
       depthCubesMesh2.updateMatrixWorld();
-    } */
+    }
 
     // camera
     const camera = makeDefaultCamera();

@@ -758,5 +758,8 @@ export class ZineRenderer extends EventTarget {
         targetZineRenderer.camera.scale
       );
     targetZineRenderer.camera.updateMatrixWorld();
+
+    // XXX resize the exit rectangle to match scale of the next rectangle,
+    // so that we only enter the next panel in an area that's in bounds
   }
 }

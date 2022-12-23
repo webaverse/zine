@@ -9,3 +9,7 @@ export const pointcloudStride = 4 + 4 + 4 + 1 + 1 + 1;
 export const physicsPixelStride = 8;
 
 export const portalExtrusion = 1; // 1m
+
+export const entranceExitHeight = 2;
+export const entranceExitWidth = 2;
+export const entranceExitDepth = 20;

@@ -7,3 +7,5 @@ export const floorNetPixelSize = floorNetWorldSize / floorNetResolution;
 
 export const pointcloudStride = 4 + 4 + 4 + 1 + 1 + 1;
 export const physicsPixelStride = 8;
+
+export const portalExtrusion = 1; // 1m

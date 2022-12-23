@@ -589,7 +589,8 @@ export class ZineRenderer extends EventTarget {
       width: resolution[0],
       height: resolution[1],
     });
-    capSceneMesh.frustumCulled = false;
+    // capSceneMesh.frustumCulled = false;
+    capSceneMesh.visible = false;
     this.transformScene.add(capSceneMesh);
     this.capSceneMesh = capSceneMesh;
 

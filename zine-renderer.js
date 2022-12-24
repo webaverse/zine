@@ -25,8 +25,6 @@ import {
 
 //
 
-// const upVector = new THREE.Vector3(0, 1, 0);
-// const backwardVector = new THREE.Vector3(0, 0, 1);
 const oneVector = new THREE.Vector3(1, 1, 1);
 const y180Matrix = new THREE.Matrix4().makeRotationY(Math.PI);
 
@@ -502,13 +500,12 @@ export class ZineRenderer extends EventTarget {
         for (let i = 0; i < ps.length; i++) {
           const pointArray = ps[i];
           localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2])
-            .premultiply(transformScene.matrixWorld);
           depthCubesMesh.setMatrixAt(index++, localMatrix);
           depthCubesMesh.count++;
         }
       });
       depthCubesMesh.instanceMatrix.needsUpdate = true;
-      scene.add(depthCubesMesh);
+      this.transformScene.add(depthCubesMesh);
       depthCubesMesh.updateMatrixWorld();
     }
     {
@@ -554,7 +551,7 @@ export class ZineRenderer extends EventTarget {
         depthCubesMesh2.count++;
       });
       depthCubesMesh2.instanceMatrix.needsUpdate = true;
-      scene.add(depthCubesMesh2);
+      this.transformScene.add(depthCubesMesh2);
       depthCubesMesh2.updateMatrixWorld();
     }
 

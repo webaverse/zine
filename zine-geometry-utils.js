@@ -264,35 +264,19 @@ export function depthFloat32ArrayToHeightfield(
   height,
   camera,
 ) {
-  // const {near, far} = camera;
-
   const heightfield = new Float32Array(width * height);
   for (let i = 0; i < depthFloat32Array.length; i++) {
     let x = (i % width);
     let y = Math.floor(i / width);
-    // y = height - 1 - y;
     x = width - 1 - x;
 
     const index = x + y * width;
 
     const viewZ = depthFloat32Array[i];
-    const depth = camera.position.y - viewZ;
-    heightfield[index] = depth;
+    const height = camera.position.y - viewZ;
+    heightfield[index] = height;
   }
   return heightfield;
-
-  // const widthSegments = width - 1;
-  // const heightSegments = height - 1;
-  // // geometry is camera-relative
-  // const geometry = new THREE.PlaneGeometry(1, 1, widthSegments, heightSegments);
-  // depthFloat32ArrayToOrthographicPositionAttributeArray(
-  //   depthFloat32Array,
-  //   width,
-  //   height,
-  //   camera,
-  //   geometry.attributes.position.array,
-  // );
-  // return geometry;
 }
 
 //

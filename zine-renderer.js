@@ -725,11 +725,6 @@ export class ZineRenderer extends EventTarget {
     const entranceMatrixWorldInverse = entranceMatrixWorld.clone()
       .invert();
 
-    // console.log('entrance exit locations', {
-    //   exitLocation,
-    //   entranceLocation,
-    // });
-
     // undo the target entrance transform
     // then, apply the exit transform
     const transformMatrix = new THREE.Matrix4()

@@ -536,8 +536,7 @@ export class ZineRenderer extends EventTarget {
           new THREE.Vector3().fromArray(point.min),
           new THREE.Quaternion(),
           new THREE.Vector3(4, 4, 4)
-        )
-          .premultiply(transformScene.matrixWorld);
+        );
         depthCubesMesh2.setMatrixAt(index++, localMatrix);
         depthCubesMesh2.count++;
 
@@ -546,8 +545,7 @@ export class ZineRenderer extends EventTarget {
           new THREE.Vector3().fromArray(point.max),
           new THREE.Quaternion(),
           new THREE.Vector3(2, 2, 2)
-        )
-          .premultiply(transformScene.matrixWorld);
+        );
         depthCubesMesh2.setMatrixAt(index++, localMatrix);
         depthCubesMesh2.count++;
       });

@@ -517,7 +517,6 @@ export class ZineRenderer extends EventTarget {
         // vertexColors: true,
       });
 
-      // console.log('render edge depth resolution', width, height, resolution);
       const depthCubesMesh2 = new THREE.InstancedMesh(
         depthCubesGeometry2,
         depthCubesMaterial2,

@@ -705,10 +705,6 @@ export class ZineRenderer extends EventTarget {
     );
 
     const entranceLocation = targetZineRenderer.metadata.entranceExitLocations[entranceIndex];
-    // if (!entranceLocation) {
-    //   console.warn('no entrance location', entranceIndex);
-    //   debugger;
-    // }
     const entranceMatrix = new THREE.Matrix4().compose(
       localVector.fromArray(entranceLocation.position),
       localQuaternion.fromArray(entranceLocation.quaternion),

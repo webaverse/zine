@@ -750,4 +750,75 @@ export class ZineRenderer extends EventTarget {
     // XXX resize the exit rectangle to match scale of the next rectangle,
     // so that we only enter the next panel in an area that's in bounds
   }
+  alignEntranceToFloorPosition(floorPosition, exitWorldLocation, entranceLocalLocation) {
+    // if (floorPosition === undefined || exitWorldLocation === undefined || entranceLocalLocation === undefined) {
+    //   console.warn('bad args', {floorPosition, exitWorldLocation, entranceLocalLocation});
+    //   debugger;
+    // }
+    // console.log('exit matrix world', exitWorldLocation.position);
+    const exitDropMatrixWorld = new THREE.Matrix4().compose(
+      floorPosition,
+      localQuaternion.fromArray(exitWorldLocation.quaternion)
+        .premultiply(y180Quaternion),
+      oneVector
+    );
+
+    const entranceLocalMatrixInverse = new THREE.Matrix4().compose(
+      localVector.fromArray(entranceLocalLocation.position),
+      // zeroVector,
+      localQuaternion.fromArray(entranceLocalLocation.quaternion),
+      oneVector
+    ).invert();
+    const entranceLocalMatrix = new THREE.Matrix4().compose(
+      localVector.fromArray(entranceLocalLocation.position),
+      new THREE.Quaternion(),
+      oneVector
+    );
+    // const entranceLocalMatrixInverse = entranceLocalMatrix.clone()
+    //   .invert();
+    // const entranceMatrixWorld = entranceMatrix.clone()
+    //   .premultiply(this.transformScene.matrixWorld);
+    // entranceMatrixWorld.decompose(
+    //   localVector,
+    //   localQuaternion,
+    //   localVector2
+    // );
+    // entranceMatrixWorld.compose(
+    //   localVector,
+    //   localQuaternion,
+    //   oneVector
+    // );
+    // const entranceMatrixWorldInverse = entranceMatrixWorld.clone()
+    //   .invert();
+    
+    // const floorMatrix = new THREE.Matrix4().compose(
+    //   floorPosition,
+    //   new THREE.Quaternion(),
+    //   oneVector
+    // );
+
+    // undo the target entrance transform
+    // then, apply the floor transform
+    const transformMatrix = entranceLocalMatrixInverse.clone()
+      .premultiply(exitDropMatrixWorld)
+    // const transformMatrix = exitDropMatrixWorld;
+
+    this.scene.matrix
+      .copy(transformMatrix)
+      .decompose(
+        this.scene.position,
+        this.scene.quaternion,
+        this.scene.scale
+      );
+    this.scene.updateMatrixWorld();
+
+    this.camera.matrix
+      .copy(transformMatrix)
+      .decompose(
+        this.camera.position,
+        this.camera.quaternion,
+        this.camera.scale
+      );
+    this.camera.updateMatrixWorld();
+  }
 }

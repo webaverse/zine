@@ -25,7 +25,9 @@ import {
 
 //
 
+const zeroVector = new THREE.Vector3(0, 0, 0);
 const oneVector = new THREE.Vector3(1, 1, 1);
+const y180Quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 const y180Matrix = new THREE.Matrix4().makeRotationY(Math.PI);
 
 const fakeMaterial = new THREE.MeshBasicMaterial({

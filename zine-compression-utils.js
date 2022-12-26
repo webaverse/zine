@@ -115,7 +115,7 @@ const testPointCloudCompression = async () => {
     decodedPointCloud,
   });
 };
-globalThis.testPointCloudCompression = testPointCloudCompression;
+globalThis.testPointCloudCompression = testPointCloudCompression; // XXX
 
 //
 
@@ -251,7 +251,7 @@ const testDepthCompression = async () => {
     decodedDepth,
   });
 };
-globalThis.testDepthCompression = testDepthCompression;
+globalThis.testDepthCompression = testDepthCompression; // XXX
 
 //
 
@@ -376,7 +376,7 @@ const testByteAttributeCompression = async () => {
     decodedDepth,
   });
 };
-globalThis.testByteAttributeCompression = testByteAttributeCompression;
+globalThis.testByteAttributeCompression = testByteAttributeCompression; // XXX
 
 //
 
@@ -442,4 +442,4 @@ const testCompressionGeneric = async () => {
     }
   }
 };
-globalThis.testCompressionGeneric = testCompressionGeneric;
+globalThis.testCompressionGeneric = testCompressionGeneric; // XXX

@@ -487,3 +487,88 @@ export const getGeometryHeights = (geometry, width, height, heightfieldScale) =>
   }
   return heights;
 };
+
+/* def reconstruct_3D(depth, f):
+  """
+  Reconstruct depth to 3D pointcloud with the provided focal length.
+  Return:
+      pcd: N X 3 array, point cloud
+  """
+  cu = depth.shape[1] / 2
+  cv = depth.shape[0] / 2
+  width = depth.shape[1]
+  height = depth.shape[0]
+  row = np.arange(0, width, 1)
+  u = np.array([row for i in np.arange(height)])
+  # u is now a 2D array with each row being [0, 1, 2, 3, ..., width-1]
+  col = np.arange(0, height, 1)
+  v = np.array([col for i in np.arange(width)])
+  # v is now a 2D array with each row being [0, 1, 2, 3, ..., height-1]
+  v = v.transpose(1, 0)
+  # after transpose, v is now a 2D array with each column being [0, 1, 2, 3, ..., height-1]
+
+  if f > 1e5:
+      print('Infinit focal length!!!')
+      x = u - cu
+      y = v - cv
+      z = depth / depth.max() * x.max()
+  else:
+      x = (u - cu) * depth / f
+      y = (v - cv) * depth / f
+      z = depth
+
+  x = np.reshape(x, (width * height, 1)).astype(np.float)
+  y = np.reshape(y, (width * height, 1)).astype(np.float)
+  z = np.reshape(z, (width * height, 1)).astype(np.float)
+  pcd = np.concatenate((x, y, z), axis=1)
+  pcd = pcd.astype(np.int)
+  return pcd */
+// port this python code to javascript:
+export const reconstructPointCloudFromDepthField = (
+  depthFieldArrayBuffer,
+  width,
+  height,
+  fov,
+) => {
+  const depthField = new Float32Array(depthFieldArrayBuffer);
+  // # compute focal length from fov:
+  // # f = (rgb.shape[0] // 2 / np.tan((fov/2.0)*np.pi/180))
+  const f = height / 2 / Math.tan((fov / 2.0) * Math.PI / 180);
+  const pointCloud = new Float32Array(width * height * 3);
+  const cu = width / 2;
+  const cv = height / 2;
+  for (let dy = 0; dy < height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      const index = dy * width + dx;
+      // if (index === undefined) {
+      //   console.log('stop 1');
+      //   debugger;
+      // }
+      // if (isNaN(index)) {
+      //   console.log('stop 2', {
+      //     dx,
+      //     dy,
+      //     width,
+      //   });
+      //   debugger;
+      // }
+      const depth = depthField[index];
+
+      let u = dx;
+      let v = dy;
+      let x = (u - cu) * depth / f;
+      let y = (v - cv) * depth / f;
+      let z = depth;
+
+      // if (isNaN(z)) {
+      //   console.warn('got nan', z);
+      //   debugger;
+      // }
+
+      pointCloud[index * 3 + 0] = x;
+      pointCloud[index * 3 + 1] = y;
+      pointCloud[index * 3 + 2] = z;
+    }
+  }
+  return pointCloud;
+};

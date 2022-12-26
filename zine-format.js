@@ -8,6 +8,9 @@ import {
   zbencode,
   zbdecode,
 } from './encoding.js';
+import {
+  ZineStoryboardCompressor,
+} from './zine-compression.js';
 
 //
 

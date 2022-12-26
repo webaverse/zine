@@ -174,13 +174,34 @@ export class ZineStoryboard extends EventTarget {
     return this.zd.getKeys(this.prefix);
   }
   
+  clone() {
+    const result = new ZineStoryboard();
+    result.#loadUncompressed(this.#exportUncompressed());
+    return result;
+  }
   clear() {
     this.zd.clear();
   }
-  load(uint8Array) {
+  async loadAsync(uint8Array) {
+    this.#loadUncompressed(uint8Array);
+    const zineStoryboardClone = this.clone();
+    const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
+    console.log('load compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
+    const compressor = new ZineStoryboardCompressor();
+    await compressor.decompress(this);
+  }
+  #loadUncompressed(uint8Array) {
     this.zd.load(uint8Array);
   }
-  export() {
+  async exportAsync() {
+    const zineStoryboardClone = this.clone();
+    const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
+    const compressor = new ZineStoryboardCompressor();
+    await compressor.compress(zineStoryboardClone);
+    console.log('export compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
+    return zineStoryboardClone.#exportUncompressed();
+  }
+  #exportUncompressed() {
     return this.zd.toUint8Array();
   }
 

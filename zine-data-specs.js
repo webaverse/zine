@@ -38,6 +38,18 @@ export const layer1Specs = [
   'edgeDepths',
   'paths',
 ];
+export const layer1CompressionSpecs = [
+  {
+    layer: 1,
+    key: 'depthField',
+    type: 'depth',
+  },
+  {
+    layer: 1,
+    key: 'floorNetDepths',
+    type: 'depth',
+  }
+];
 
 //
 

@@ -119,7 +119,7 @@ export class ZineStoryboard extends EventTarget {
     const onadd = e => {
       // console.log('zine panel add event', e.data.keyPath, this.prefix);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
-        console.log('bail');
+        // console.log('bail');
         return;
       } else {
         // console.log('continue');
@@ -143,10 +143,10 @@ export class ZineStoryboard extends EventTarget {
     const onremove = e => {
       // console.log('zine panel remove event', e.data.keyPath, this.prefix, this.#panels.length, new Error().stack);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
-        console.log('bail');
+        // console.log('bail');
         return;
       } else {
-        console.log('continue');
+        // console.log('continue');
       }
 
       const {
@@ -220,6 +220,7 @@ export class ZineStoryboard extends EventTarget {
     this.zd.setData(keyPath, []);
 
     const panel = this.#panels[this.#panels.length - 1];
+    // console.log('add panel', this.#panels.length);
     return panel;
   }
 
@@ -228,7 +229,7 @@ export class ZineStoryboard extends EventTarget {
     this.removePanelIndex(index);
   }
   removePanelIndex(index) {
-    console.log('remove panel index', index);
+    // console.log('remove panel index', index);
     if (index !== -1) {
       const panel = this.#panels[index];
       const keyPath = this.prefix.concat([panel.id]);
@@ -365,10 +366,10 @@ class ZineLayer extends EventTarget {
   constructor(zd, prefix) {
     super();
 
-    if (!zd) {
-      console.warn('no zd b', this);
-      debugger;
-    }
+    // if (!zd) {
+    //   console.warn('no zd b', this);
+    //   debugger;
+    // }
 
     this.zd = zd;
     this.prefix = prefix;

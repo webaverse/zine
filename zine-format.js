@@ -435,10 +435,10 @@ export class ZineData extends EventTarget {
   //
 
   clear() {
-    for (let i = 0; i < this.data.length; i++) {
+    for (const [id, panelData] of this.data) {
       this.dispatchEvent(new MessageEvent('remove', {
         data: {
-          keyPath: [i],
+          keyPath: [id],
         },
       }));
     }

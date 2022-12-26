@@ -115,7 +115,7 @@ const testPointCloudCompression = async () => {
     decodedPointCloud,
   });
 };
-globalThis.testPointCloudCompression = testPointCloudCompression;
+// globalThis.testPointCloudCompression = testPointCloudCompression;
 
 //
 
@@ -246,8 +246,6 @@ export const decompressDepthQuantized = async (byteArray, maxDepth = 10000) => {
     //   indexArray[i] = indexAttributeData.GetValue(i);
     // }
 
-    // console.log('decode index array', uint16Array, indexAttribute, indexArray);
-
     // decode back to float32
     const float32Array = new Float32Array(uint16Array.length);
     for (let i = 0; i < uint16Array.length; i++) {
@@ -289,7 +287,7 @@ const testDepthCompressionQuantized = async () => {
     decodedDepth,
   });
 };
-globalThis.testDepthCompressionQuantized = testDepthCompressionQuantized; // XXX
+// globalThis.testDepthCompressionQuantized = testDepthCompressionQuantized; // XXX
 
 //
 
@@ -425,7 +423,7 @@ const testDepthCompression = async () => {
     decodedDepth,
   });
 };
-globalThis.testDepthCompression = testDepthCompression; // XXX
+// globalThis.testDepthCompression = testDepthCompression; // XXX
 
 //
 
@@ -550,7 +548,7 @@ const testByteAttributeCompression = async () => {
     decodedDepth,
   });
 };
-globalThis.testByteAttributeCompression = testByteAttributeCompression; // XXX
+// globalThis.testByteAttributeCompression = testByteAttributeCompression; // XXX
 
 //
 
@@ -616,4 +614,4 @@ const testCompressionGeneric = async () => {
     }
   }
 };
-globalThis.testCompressionGeneric = testCompressionGeneric; // XXX
+// globalThis.testCompressionGeneric = testCompressionGeneric; // XXX

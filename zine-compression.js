@@ -19,7 +19,6 @@ const quantization = 16;
 
 //
 
-let first = true;
 export class ZineStoryboardCompressor {
   async compress(storyboard) {
     const panels = storyboard.getPanels();
@@ -43,36 +42,27 @@ export class ZineStoryboardCompressor {
             } else {
               throw new Error('unknown compression type: ' + type);
             }
-            console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
+            // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
             layer1.setData(key, compressedValue);
 
-            // XXX test decompression
-            {
-              if (type === 'depth') {
-                const compressedValue = layer1.getData(key);
-                const decompressedValue = await decompressDepth(compressedValue);
-                console.log('compare', value, decompressedValue);
-              }
-            }
+            // test decompression
+            // if (type === 'depth') {
+            //   const compressedValue = layer1.getData(key);
+            //   const decompressedValue = await decompressDepth(compressedValue);
+            //   console.log('compare', value, decompressedValue);
+            // }
           }
         }
       }
     }
   }
   async decompress(storyboard) {
-    // XXX decompress is called twice...
-    console.log('call decompress', first, new Error().stack);
-    if (!first) {
-      debugger;
-    } else {
-      first = false;
-    }
     const panels = storyboard.getPanels();
     for (let i = 0; i < panels.length; i++) {
       const panel = panels[i];
-      console.log('check panel', {
-        i,
-      });
+      // console.log('check panel', {
+      //   i,
+      // });
 
       const layers = panel.getLayers();
       const layer1 = layers[1];
@@ -81,14 +71,14 @@ export class ZineStoryboardCompressor {
           const compressionSpec = layer1CompressionSpecs[j];
 
           const {key, type} = compressionSpec;
-          console.log('check compression spec', {
-            j,
-            key,
-            type,
-          });
+          // console.log('check compression spec', {
+          //   j,
+          //   key,
+          //   type,
+          // });
           const value = layer1.getData(key);
           if (value !== undefined) {
-            console.log('had decompressible data', key, type, value);
+            // console.log('had decompressible data', key, type, value);
             let decompressedValue;
             if (type === 'pointCloud') {
               decompressedValue = await decompressPointCloud(value);
@@ -105,7 +95,7 @@ export class ZineStoryboardCompressor {
             } else {
               throw new Error('unknown compression type: ' + type);
             }
-            console.log('decompressed', key, type, value, decompressedValue);
+            // console.log('decompressed', key, type, value, decompressedValue);
             layer1.setData(key, decompressedValue);
           }
         }

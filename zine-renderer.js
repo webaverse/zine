@@ -440,8 +440,8 @@ export class ZineRenderer extends EventTarget {
     const quaternion = layer1.getData('quaternion');
     const scale = layer1.getData('scale');
     const segmentMask = layer1.getData('segmentMask');
-    const pointCloudHeaders = layer1.getData('pointCloudHeaders');
-    const pointCloudArrayBuffer = layer1.getData('pointCloud');
+    const depthFieldHeaders = layer1.getData('depthFieldHeaders');
+    const depthFieldArrayBuffer = layer1.getData('depthField');
     const planesJson = layer1.getData('planesJson');
     const planesMask = layer1.getData('planesMask');
     const portalJson = layer1.getData('portalJson');
@@ -566,6 +566,13 @@ export class ZineRenderer extends EventTarget {
     this.camera.updateProjectionMatrix();
 
     // scene mesh
+    const pointCloudFloat32Array = reconstructPointCloudFromDepthField(
+      depthFieldArrayBuffer,
+      width,
+      height,
+      fov,
+    );
+    const pointCloudArrayBuffer = pointCloudFloat32Array.buffer;
     const sceneMesh = new SceneMesh({
       pointCloudArrayBuffer,
       imgArrayBuffer,

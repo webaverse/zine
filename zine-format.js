@@ -141,7 +141,7 @@ export class ZineStoryboard extends EventTarget {
     this.zd.addEventListener('add', onadd);
 
     const onremove = e => {
-      console.log('zine panel remove event', e.data.keyPath, this.prefix, this.#panels.length, new Error().stack);
+      // console.log('zine panel remove event', e.data.keyPath, this.prefix, this.#panels.length, new Error().stack);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
         console.log('bail');
         return;
@@ -189,7 +189,7 @@ export class ZineStoryboard extends EventTarget {
     this.#loadUncompressed(uint8Array);
     const zineStoryboardClone = this.clone();
     const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
-    console.log('load compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
+    // console.log('load compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
     const compressor = new ZineStoryboardCompressor();
     await compressor.decompress(this);
   }
@@ -201,7 +201,7 @@ export class ZineStoryboard extends EventTarget {
     const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
     const compressor = new ZineStoryboardCompressor();
     await compressor.compress(zineStoryboardClone);
-    console.log('export compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
+    // console.log('export compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
     return zineStoryboardClone.#exportUncompressed();
   }
   #exportUncompressed() {

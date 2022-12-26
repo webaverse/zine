@@ -225,15 +225,12 @@ export class ZineStoryboard extends EventTarget {
     this.removePanelIndex(index);
   }
   removePanelIndex(index) {
+    console.log('remove panel index', index);
     if (index !== -1) {
       const panel = this.#panels[index];
       const keyPath = this.prefix.concat([panel.id]);
       this.zd.deleteData(keyPath);
     } else {
-      // console.warn('panel not found', {
-      //   panel,
-      //   panels: this.#panels,
-      // });
       throw new Error('panel not found');
     }
   }

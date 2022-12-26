@@ -8,6 +8,7 @@ import {
   makeDefaultCamera,
 } from './zine-utils.js';
 import {
+  reconstructPointCloudFromDepthField,
   // getDepthFloatsFromIndexedGeometry,
   // reinterpretFloatImageData,
   pointCloudArrayBufferToGeometry,
@@ -25,7 +26,7 @@ import {
 
 //
 
-const zeroVector = new THREE.Vector3(0, 0, 0);
+// const zeroVector = new THREE.Vector3(0, 0, 0);
 const oneVector = new THREE.Vector3(1, 1, 1);
 const y180Quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 const y180Matrix = new THREE.Matrix4().makeRotationY(Math.PI);
@@ -459,7 +460,10 @@ export class ZineRenderer extends EventTarget {
     const edgeDepths = layer1.getData('edgeDepths');
     const paths = layer1.getData('paths');
 
-    const [width, height] = resolution;
+    const [
+      width,
+      height,
+    ] = resolution;
 
     // scene
     const scene = new THREE.Object3D();
@@ -557,15 +561,16 @@ export class ZineRenderer extends EventTarget {
     // camera
     const camera = makeDefaultCamera();
     this.camera = camera;
-    this.camera.fov = Number(pointCloudHeaders['x-fov']);
+    const fov = Number(depthFieldHeaders['x-fov']);
+    this.camera.fov = fov;
     this.camera.updateProjectionMatrix();
 
     // scene mesh
     const sceneMesh = new SceneMesh({
       pointCloudArrayBuffer,
       imgArrayBuffer,
-      width: resolution[0],
-      height: resolution[1],
+      width,
+      height,
       segmentSpecs,
       planeSpecs,
       portalSpecs,
@@ -582,8 +587,8 @@ export class ZineRenderer extends EventTarget {
       edgeDepths,
       matrixWorld: transformScene.matrixWorld,
       map: sceneMesh.material.uniforms.map.value,
-      width: resolution[0],
-      height: resolution[1],
+      width,
+      height,
     });
     // capSceneMesh.frustumCulled = false;
     capSceneMesh.visible = false;
@@ -593,8 +598,8 @@ export class ZineRenderer extends EventTarget {
     // scene physics mesh
     const scenePhysicsMesh = new ScenePhysicsMesh({
       pointCloudArrayBuffer,
-      width: resolution[0],
-      height: resolution[1],
+      width,
+      height,
       segmentSpecs,
     });
     this.transformScene.add(scenePhysicsMesh);

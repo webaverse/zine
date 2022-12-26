@@ -141,7 +141,7 @@ export class ZineStoryboard extends EventTarget {
     this.zd.addEventListener('add', onadd);
 
     const onremove = e => {
-      console.log('zine panel remove event', e.data.keyPath, this.prefix);
+      console.log('zine panel remove event', e.data.keyPath, this.prefix, this.#panels.length, new Error().stack);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
         console.log('bail');
         return;

@@ -252,3 +252,69 @@ const testDepthCompression = async () => {
   });
 };
 globalThis.testDepthCompression = testDepthCompression;
+
+//
+
+function mergeChunks(chunks) {
+  const result = new Uint8Array(chunks.reduce((a, b) => a + b.byteLength, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return result;
+}
+const makeReadableStream = array => new ReadableStream({
+  pull(controller) {
+    for (let i = 0; i < array.length; i++) {
+      controller.enqueue(array[i]);
+    }
+    controller.close();
+  }
+});
+export const compressGeneric = async data => {
+  const s = makeReadableStream([
+    data,
+  ]).pipeThrough(
+    new CompressionStream('gzip')
+  );
+  const reader = s.getReader();
+  const chunks = [];
+  while (true) {
+    const {value, done} = await reader.read();
+    if (done) {
+      break;
+    }
+    chunks.push(value);
+  }
+  return mergeChunks(chunks);
+};
+export const decompressGeneric = async data => {
+  const s = makeReadableStream([
+    data,
+  ]).pipeThrough(
+    new DecompressionStream('gzip')
+  );
+  const reader = s.getReader();
+  const chunks = [];
+  while (true) {
+    const {value, done} = await reader.read();
+    if (done) {
+      break;
+    }
+    chunks.push(value);
+  }
+  return mergeChunks(chunks);
+};
+const testCompressionGeneric = async () => {
+  const testData = Uint8Array.from([1,2,3,4,5,6,7,8]);
+  const compressed = await compressGeneric(testData);
+  const decompressed = await decompressGeneric(compressed);
+  // ensure they are the same
+  for (let i = 0; i < testData.length; i++) {
+    if (testData[i] !== decompressed[i]) {
+      throw new Error('compression test failed due to data mismatch');
+    }
+  }
+};
+globalThis.testCompressionGeneric = testCompressionGeneric;

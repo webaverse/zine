@@ -16,8 +16,8 @@ export const layer1Specs = [
   'scale',
   'segmentMask',
   'cameraJson',
-  'pointCloudHeaders',
-  'pointCloud',
+  'depthFieldHeaders',
+  'depthField',
   'planesJson',
   'planesMask',
   'portalJson',
@@ -38,14 +38,26 @@ export const layer1Specs = [
   'edgeDepths',
   'paths',
 ];
+export const layer1CompressionSpecs = [
+  {
+    layer: 1,
+    key: 'depthField',
+    type: 'depth',
+  },
+  {
+    layer: 1,
+    key: 'floorNetDepths',
+    type: 'depth',
+  }
+];
 
 //
 
 export const layer2Specs = [
   'maskImg',
   'editedImg',
-  'pointCloudHeaders',
-  'pointCloud',
+  'depthFieldHeaders',
+  'depthField',
   'depthFloatImageData',
   'distanceFloatImageData',
   'distanceNearestPositions',

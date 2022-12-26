@@ -8,6 +8,9 @@ import {
   zbencode,
   zbdecode,
 } from './encoding.js';
+import {
+  ZineStoryboardCompressor,
+} from './zine-compression.js';
 
 //
 
@@ -116,7 +119,7 @@ export class ZineStoryboard extends EventTarget {
     const onadd = e => {
       // console.log('zine panel add event', e.data.keyPath, this.prefix);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
-        console.log('bail');
+        // console.log('bail');
         return;
       } else {
         // console.log('continue');
@@ -138,12 +141,12 @@ export class ZineStoryboard extends EventTarget {
     this.zd.addEventListener('add', onadd);
 
     const onremove = e => {
-      console.log('zine panel remove event', e.data.keyPath, this.prefix);
+      // console.log('zine panel remove event', e.data.keyPath, this.prefix, this.#panels.length, new Error().stack);
       if (!checkEventKeypathPrefix(e, this.prefix)) {
-        console.log('bail');
+        // console.log('bail');
         return;
       } else {
-        console.log('continue');
+        // console.log('continue');
       }
 
       const {
@@ -174,13 +177,34 @@ export class ZineStoryboard extends EventTarget {
     return this.zd.getKeys(this.prefix);
   }
   
+  clone() {
+    const result = new ZineStoryboard();
+    result.#loadUncompressed(this.#exportUncompressed());
+    return result;
+  }
   clear() {
     this.zd.clear();
   }
-  load(uint8Array) {
+  async loadAsync(uint8Array) {
+    this.#loadUncompressed(uint8Array);
+    const zineStoryboardClone = this.clone();
+    const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
+    // console.log('load compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
+    const compressor = new ZineStoryboardCompressor();
+    await compressor.decompress(this);
+  }
+  #loadUncompressed(uint8Array) {
     this.zd.load(uint8Array);
   }
-  export() {
+  async exportAsync() {
+    const zineStoryboardClone = this.clone();
+    const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
+    const compressor = new ZineStoryboardCompressor();
+    await compressor.compress(zineStoryboardClone);
+    // console.log('export compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
+    return zineStoryboardClone.#exportUncompressed();
+  }
+  #exportUncompressed() {
     return this.zd.toUint8Array();
   }
 
@@ -196,6 +220,7 @@ export class ZineStoryboard extends EventTarget {
     this.zd.setData(keyPath, []);
 
     const panel = this.#panels[this.#panels.length - 1];
+    // console.log('add panel', this.#panels.length);
     return panel;
   }
 
@@ -204,15 +229,12 @@ export class ZineStoryboard extends EventTarget {
     this.removePanelIndex(index);
   }
   removePanelIndex(index) {
+    // console.log('remove panel index', index);
     if (index !== -1) {
       const panel = this.#panels[index];
       const keyPath = this.prefix.concat([panel.id]);
       this.zd.deleteData(keyPath);
     } else {
-      // console.warn('panel not found', {
-      //   panel,
-      //   panels: this.#panels,
-      // });
       throw new Error('panel not found');
     }
   }
@@ -344,10 +366,10 @@ class ZineLayer extends EventTarget {
   constructor(zd, prefix) {
     super();
 
-    if (!zd) {
-      console.warn('no zd b', this);
-      debugger;
-    }
+    // if (!zd) {
+    //   console.warn('no zd b', this);
+    //   debugger;
+    // }
 
     this.zd = zd;
     this.prefix = prefix;
@@ -413,10 +435,10 @@ export class ZineData extends EventTarget {
   //
 
   clear() {
-    for (let i = 0; i < this.data.length; i++) {
+    for (const [id, panelData] of this.data) {
       this.dispatchEvent(new MessageEvent('remove', {
         data: {
-          keyPath: [i],
+          keyPath: [id],
         },
       }));
     }

@@ -487,3 +487,33 @@ export const getGeometryHeights = (geometry, width, height, heightfieldScale) =>
   }
   return heights;
 };
+
+export const reconstructPointCloudFromDepthField = (
+  depthFieldArrayBuffer,
+  width,
+  height,
+  fov,
+) => {
+  const depthField = new Float32Array(depthFieldArrayBuffer);
+  const focal = height / 2 / Math.tan((fov / 2.0) * Math.PI / 180);
+  const pointCloud = new Float32Array(width * height * 3);
+  const cu = width / 2;
+  const cv = height / 2;
+  for (let dy = 0; dy < height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      const index = dy * width + dx;
+      const depth = depthField[index];
+
+      const u = dx;
+      const v = dy;
+      const x = (u - cu) * depth / focal;
+      const y = (v - cv) * depth / focal;
+      const z = depth;
+
+      pointCloud[index * 3 + 0] = x;
+      pointCloud[index * 3 + 1] = y;
+      pointCloud[index * 3 + 2] = z;
+    }
+  }
+  return pointCloud;
+};

@@ -115,7 +115,181 @@ const testPointCloudCompression = async () => {
     decodedPointCloud,
   });
 };
-globalThis.testPointCloudCompression = testPointCloudCompression; // XXX
+globalThis.testPointCloudCompression = testPointCloudCompression;
+
+//
+
+export const compressDepthQuantized = async (float32Array, maxDepth = 10000) => {
+  const numPoints = float32Array.length;
+
+  // // find the min and max depth
+  // let minDepth = Infinity;
+  // let maxDepth = -Infinity;
+  // for (let i = 0; i < float32Array.length; i++) {
+  //   const depth = float32Array[i];
+  //   if (depth < minDepth) {
+  //     minDepth = depth;
+  //   }
+  //   if (depth > maxDepth) {
+  //     maxDepth = depth;
+  //   }
+  // }
+  
+  const [
+    encoderModule,
+    // decoderModule,
+  ] = await Promise.all([
+    DracoEncoderModule(),
+    // DracoDecoderModule(),
+  ]);
+  
+  const encoder = new encoderModule.Encoder();
+  const pointCloudBuilder = new encoderModule.PointCloudBuilder();
+  const dracoPointCloud = new encoderModule.PointCloud();
+
+  encoder.SetEncodingMethod(encoderModule.POINT_CLOUD_SEQUENTIAL_ENCODING);
+  // encoder.SetEncodingMethod(encoderModule.POINT_CLOUD_KD_TREE_ENCODING);
+  // encoder.SetAttributeQuantization(encoderModule.GENERIC, 0);
+
+  // encode the floats to fit inside uint16
+  const uint16Array = new Uint16Array(float32Array.length);
+  for (let i = 0; i < float32Array.length; i++) {
+    const depth = float32Array[i];
+    const encodedDepth = Math.round(depth) / maxDepth * 65535;
+    uint16Array[i] = encodedDepth;
+  }
+  // add indices
+  // const indexArray = new Uint16Array(float32Array.length);
+  // for (let i = 0; i < float32Array.length; i++) {
+  //   indexArray[i] = i;
+  // }
+
+  const positionAttribute = pointCloudBuilder.AddUInt16Attribute(
+    dracoPointCloud,
+    encoderModule.POSITION,
+    numPoints,
+    1,
+    uint16Array,
+  );
+  // const indexAttribute = pointCloudBuilder.AddUInt16Attribute(
+  //   dracoPointCloud,
+  //   encoderModule.GENERIC,
+  //   numPoints,
+  //   1,
+  //   indexArray,
+  // );
+
+  const encodedData = new encoderModule.DracoInt8Array();
+  const encodedLen = encoder.EncodePointCloudToDracoBuffer(dracoPointCloud, false, encodedData);
+  const uint8Array = new Uint8Array(encodedLen);
+  const int8Array = new Int8Array(uint8Array.buffer);
+  for (let i = 0; i < encodedLen; i++) {
+    int8Array[i] = encodedData.GetValue(i);
+  }
+  const result = uint8Array;
+
+  encoderModule.destroy(encodedData);
+  encoderModule.destroy(dracoPointCloud);
+  encoderModule.destroy(encoder);
+  encoderModule.destroy(pointCloudBuilder);
+
+  return result;
+};
+export const decompressDepthQuantized = async (byteArray, maxDepth = 10000) => {
+  const [
+    // encoderModule,
+    decoderModule,
+  ] = await Promise.all([
+    // DracoEncoderModule(),
+    DracoDecoderModule(),
+  ]);
+
+  // Create the Draco decoder.
+  const buffer = new decoderModule.DecoderBuffer();
+  buffer.Init(byteArray, byteArray.length);
+
+  // Create a buffer to hold the encoded data.
+  const decoder = new decoderModule.Decoder();
+  const geometryType = decoder.GetEncodedGeometryType(buffer);
+
+  // Decode the encoded geometry.
+  let outputGeometry;
+  let status;
+  if (geometryType == decoderModule.TRIANGULAR_MESH) {
+    // outputGeometry = new decoderModule.Mesh();
+    // status = decoder.DecodeBufferToMesh(buffer, outputGeometry);
+    throw new Error('decompress failed because the encoded geometry is not a point cloud');
+  } else {
+    outputGeometry = new decoderModule.PointCloud();
+    status = decoder.DecodeBufferToPointCloud(buffer, outputGeometry);
+  }
+
+  if (!status.ok()) {
+    const pc = outputGeometry;
+    // long GetAttributeId([Ref, Const] PointCloud pc, draco_GeometryAttribute_Type type);
+    const positionAttribute = decoder.GetAttribute(pc, 0);
+    const positionAttributeData = new decoderModule.DracoUInt16Array();
+    decoder.GetAttributeUInt16ForAllPoints(pc, positionAttribute, positionAttributeData);
+    // const positionAttributeData = new decoderModule.DracoFloat32Array();
+    // decoder.GetAttributeFloatForAllPoints(pc, positionAttribute, positionAttributeData);
+    // const indexAttribute = decoder.GetAttribute(pc, 1);
+    // const indexAttributeData = new decoderModule.DracoUInt16Array();
+    // decoder.GetAttributeUInt16ForAllPoints(pc, indexAttribute, indexAttributeData);
+
+    // copy data
+    const uint16Array = new Uint16Array(positionAttributeData.size());
+    for (let i = 0; i < uint16Array.length; i++) {
+      uint16Array[i] = positionAttributeData.GetValue(i);
+    }
+    // const indexArray = new Uint16Array(indexAttributeData.size());
+    // for (let i = 0; i < indexArray.length; i++) {
+    //   indexArray[i] = indexAttributeData.GetValue(i);
+    // }
+
+    // console.log('decode index array', uint16Array, indexAttribute, indexArray);
+
+    // decode back to float32
+    const float32Array = new Float32Array(uint16Array.length);
+    for (let i = 0; i < uint16Array.length; i++) {
+      const encodedDepth = uint16Array[i];
+      const depth = encodedDepth / 65535 * maxDepth;
+      float32Array[i] = depth;
+    }
+
+    // You must explicitly delete objects created from the DracoDecoderModule
+    // or Decoder.
+    decoderModule.destroy(pc);
+    decoderModule.destroy(positionAttribute);
+    decoderModule.destroy(positionAttributeData);
+    decoderModule.destroy(decoder);
+    decoderModule.destroy(buffer);
+
+    return float32Array;
+  } else {
+    debugger;
+    throw new Error('decompress failed');
+  }
+};
+const testDepthCompressionQuantized = async () => {
+  const testData = Float32Array.from([
+    1, 2, 3,
+    1, 2, 3,
+    1, 2, 3,
+    4, 5, 6,
+    4, 5, 6,
+    4, 5, 6,
+    7, 8, 9,
+    7, 8, 9,
+    7, 8, 9,
+  ].concat(Array(128).fill(7))).map(n => n * 1000);
+  const uint8Array = await compressDepthQuantized(testData);
+  const decodedDepth = await decompressDepthQuantized(uint8Array);
+  console.log(`compression test compression ratio: ${compressionRatioString(uint8Array, testData)}`, {
+    testData,
+    decodedDepth,
+  });
+};
+globalThis.testDepthCompressionQuantized = testDepthCompressionQuantized; // XXX
 
 //
 

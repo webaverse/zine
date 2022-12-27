@@ -1,14 +1,18 @@
 import {
+  compressImage,
   compressPointCloud,
   decompressPointCloud,
   compressDepth,
   compressDepthQuantized,
   decompressDepth,
   decompressDepthQuantized,
+  compressByteAttribute,
+  decompressByteAttribute,
   compressGeneric,
   decompressGeneric,
 } from './zine-compression-utils.js';
 import {
+  layer0CompressionSpecs,
   layer1CompressionSpecs,
 } from './zine-data-specs.js';
 
@@ -16,6 +20,10 @@ import {
 
 const maxDepth = 10000;
 const quantization = 16;
+const layersCompressionSpecs = [
+  layer0CompressionSpecs,
+  layer1CompressionSpecs,
+];
 
 //
 
@@ -24,26 +32,32 @@ export class ZineStoryboardCompressor {
     const panels = storyboard.getPanels();
     for (const panel of panels) {
       const layers = panel.getLayers();
-      const layer1 = layers[1];
-      if (layer1) {
-        for (const compressionSpec of layer1CompressionSpecs) {
-          const {key, type} = compressionSpec;
-          const value = layer1.getData(key);
-          if (value !== undefined) {
-            let compressedValue;
-            if (type === 'pointCloud') {
-              compressedValue = await compressPointCloud(new Float32Array(value));
-            } else if (type === 'depthQuantized') {
-              compressedValue = await compressDepthQuantized(new Float32Array(value, maxDepth));
-            } else if (type === 'depth') {
-              compressedValue = await compressDepth(new Float32Array(value), quantization);
-            } else if (type === 'generic') {
-              compressedValue = await compressGeneric(value);
-            } else {
-              throw new Error('unknown compression type: ' + type);
+      for (let i = 0; i < layers.length; i++) {
+        const layer = layers[i];
+        const compressionSpecs = layersCompressionSpecs[i];
+        if (compressionSpecs) {
+          for (const {key, type} of compressionSpecs) {
+            const value = layer.getData(key);
+            if (value !== undefined) {
+              let compressedValue;
+              if (type === 'image') {
+                compressedValue = await compressImage(value);
+              } else if (type === 'pointCloud') {
+                compressedValue = await compressPointCloud(new Float32Array(value));
+              } else if (type === 'depthQuantized') {
+                compressedValue = await compressDepthQuantized(new Float32Array(value, maxDepth));
+              } else if (type === 'depth') {
+                compressedValue = await compressDepth(new Float32Array(value), quantization);
+              } else if (type === 'byteAttribute') {
+                compressedValue = await compressByteAttribute(value);
+              } else if (type === 'generic') {
+                compressedValue = await compressGeneric(value);
+              } else {
+                throw new Error('unknown compression type: ' + type);
+              }
+              // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
+              layer.setData(key, compressedValue);
             }
-            // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
-            layer1.setData(key, compressedValue);
           }
         }
       }
@@ -74,6 +88,8 @@ export class ZineStoryboardCompressor {
               decompressedValue = await decompressDepthQuantized(value);
             } else if (type === 'depth') {
               decompressedValue = await decompressDepth(value);
+            } else if (type === 'byteAttribute') {
+              decompressedValue = await decompressByteAttribute(value);
             } else if (type === 'generic') {
               decompressedValue = await decompressGeneric(value);
             } else {

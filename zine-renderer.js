@@ -23,6 +23,9 @@ import {
   pointcloudStride,
   physicsPixelStride,
 } from './zine-constants.js';
+// import {
+//   categoryClassIndices,
+// } from './zine-classes.js';
 
 //
 

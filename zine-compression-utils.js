@@ -3,6 +3,29 @@
 import DracoEncoderModule from './lib/draco/draco_encoder.js';
 import DracoDecoderModule from './lib/draco/draco_decoder.js';
 
+//
+
+export const compressImage = async imageArrayBuffer => {
+  const blob = new Blob([
+    imageArrayBuffer,
+  ]);
+  const imageBitmap = await createImageBitmap(blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = imageBitmap.width;
+  canvas.height = imageBitmap.height;
+  const context = canvas.getContext('2d');
+  context.drawImage(imageBitmap, 0, 0);
+  imageBitmap.close();
+  // encode as webp
+  const webpBlob = await new Promise((accept, reject) => {
+    canvas.toBlob(accept, 'image/webp'/*, 0.8*/);
+  });
+  const webpArraybuffer = await webpBlob.arrayBuffer();
+  return webpArraybuffer;
+}
+
+//
+
 export const compressPointCloud = async vertices => {
   const numPoints = vertices.length / 3;
   

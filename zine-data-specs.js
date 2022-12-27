@@ -58,7 +58,17 @@ export const layer1CompressionSpecs = [
     layer: 1,
     key: 'floorNetDepths',
     type: 'depth',
-  }
+  },
+  {
+    layer: 1,
+    key: 'segmentLabelIndices',
+    type: 'byteAttribute',
+  },
+  {
+    layer: 1,
+    key: 'planeLabelIndices',
+    type: 'byteAttribute',
+  },
 ];
 
 //

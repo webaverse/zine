@@ -53,10 +53,6 @@ export class ZineStoryboardCompressor {
     const panels = storyboard.getPanels();
     for (let i = 0; i < panels.length; i++) {
       const panel = panels[i];
-      // console.log('check panel', {
-      //   i,
-      // });
-
       const layers = panel.getLayers();
       const layer1 = layers[1];
       if (layer1) {
@@ -64,11 +60,6 @@ export class ZineStoryboardCompressor {
           const compressionSpec = layer1CompressionSpecs[j];
 
           const {key, type} = compressionSpec;
-          // console.log('check compression spec', {
-          //   j,
-          //   key,
-          //   type,
-          // });
           const value = layer1.getData(key);
           if (value !== undefined) {
             // console.log('had decompressible data', key, type, value);

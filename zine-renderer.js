@@ -137,9 +137,14 @@ class SceneMesh extends THREE.Mesh {
     imgArrayBuffer,
     width,
     height,
-    segmentSpecs,
-    planeSpecs,
-    portalSpecs,
+    segmentLabels,
+    segmentLabelIndices,
+    planeLabels,
+    planeLabelIndices,
+    portalLabels,
+    // segmentSpecs,
+    // planeSpecs,
+    // portalSpecs,
     firstFloorPlaneIndex,
   }) {
     const map = new THREE.Texture();
@@ -153,15 +158,15 @@ class SceneMesh extends THREE.Mesh {
       width,
       height,
     );
-    const segmentArray = reconstructValueMaskFromLabelsIndices(segmentSpecs.labels, segmentSpecs.labelIndices);
+    const segmentArray = reconstructValueMaskFromLabelsIndices(segmentLabels, segmentLabelIndices);
     geometry.setAttribute('segment', new THREE.BufferAttribute(segmentArray, 1));
     const segmentColor = getColorArrayFromValueArray(segmentArray);
     geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentColor, 3));
-    const planeArray = reconstructValueMaskFromLabelsIndices(planeSpecs.labels, planeSpecs.labelIndices);
+    const planeArray = reconstructValueMaskFromLabelsIndices(planeLabels, planeLabelIndices);
     geometry.setAttribute('plane', new THREE.BufferAttribute(planeArray, 1));
     const planeColor = getColorArrayFromValueArray(planeArray);
     geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeColor, 3));
-    // const portalColor = getHighlightArrayFromValueArray(portalSpecs.array);
+    // const portalColor = getHighlightArrayFromValueArray(portalArray);
     // geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalColor, 3));
     const indexedGeometry = geometry;
     geometry = geometry.toNonIndexed();
@@ -173,9 +178,11 @@ class SceneMesh extends THREE.Mesh {
     sceneMesh.name = 'sceneMesh';
     sceneMesh.frustumCulled = false;
     sceneMesh.indexedGeometry = indexedGeometry;
-    sceneMesh.segmentSpecs = segmentSpecs;
-    sceneMesh.planeSpecs = planeSpecs;
-    sceneMesh.portalSpecs = portalSpecs;
+    sceneMesh.segmentLabels = segmentLabels;
+    sceneMesh.segmentLabelIndices = segmentLabelIndices;
+    sceneMesh.planeLabels = planeLabels;
+    sceneMesh.planeLabelIndices = planeLabelIndices;
+    sceneMesh.portalLabels = portalLabels;
     sceneMesh.segmentArray = segmentArray;
     sceneMesh.firstFloorPlaneIndex = firstFloorPlaneIndex;
     sceneMesh.update = (selector) => {
@@ -350,7 +357,8 @@ class ScenePhysicsMesh extends THREE.Mesh {
     pointCloudArrayBuffer,
     width,
     height,
-    segmentSpecs,
+    segmentLabels,
+    segmentLabelIndices,
   }) {
     let geometry = pointCloudArrayBufferToGeometry(
       pointCloudArrayBuffer,
@@ -361,8 +369,8 @@ class ScenePhysicsMesh extends THREE.Mesh {
 
     // maintain strided segments attribute
     const originalSegmentArray = reconstructValueMaskFromLabelsIndices(
-      segmentSpecs.labels,
-      segmentSpecs.labelIndices
+      segmentLabels,
+      segmentLabelIndices
     );
     const segments = new originalSegmentArray.constructor( // Float32Array
       originalSegmentArray.length / (physicsPixelStride * physicsPixelStride)
@@ -468,9 +476,14 @@ export class ZineRenderer extends EventTarget {
     const depthFieldArrayBuffer = layer1.getData('depthField');
     const planesJson = layer1.getData('planesJson');
     const portalJson = layer1.getData('portalJson');
-    const segmentSpecs = layer1.getData('segmentSpecs');
-    const planeSpecs = layer1.getData('planeSpecs');
-    const portalSpecs = layer1.getData('portalSpecs');
+    const segmentLabels = layer1.getData('segmentLabels');
+    const segmentLabelIndices = layer1.getData('segmentLabelIndices');
+    const planeLabels = layer1.getData('planeLabels');
+    const planeLabelIndices = layer1.getData('planeLabelIndices');
+    const portalLabels = layer1.getData('portalLabels');
+    // const segmentSpecs = layer1.getData('segmentSpecs');
+    // const planeSpecs = layer1.getData('planeSpecs');
+    // const portalSpecs = layer1.getData('portalSpecs');
     const firstFloorPlaneIndex = layer1.getData('firstFloorPlaneIndex');
     const floorNetDepths = layer1.getData('floorNetDepths');
     const floorNetCameraJson = layer1.getData('floorNetCameraJson');
@@ -601,9 +614,14 @@ export class ZineRenderer extends EventTarget {
       imgArrayBuffer,
       width,
       height,
-      segmentSpecs,
-      planeSpecs,
-      portalSpecs,
+      segmentLabels,
+      segmentLabelIndices,
+      planeLabels,
+      planeLabelIndices,
+      portalLabels,
+      // segmentSpecs,
+      // planeSpecs,
+      // portalSpecs,
       firstFloorPlaneIndex,
     });
     this.transformScene.add(sceneMesh);
@@ -630,7 +648,8 @@ export class ZineRenderer extends EventTarget {
       pointCloudArrayBuffer,
       width,
       height,
-      segmentSpecs,
+      segmentLabels,
+      segmentLabelIndices,
     });
     this.transformScene.add(scenePhysicsMesh);
     this.scenePhysicsMesh = scenePhysicsMesh;

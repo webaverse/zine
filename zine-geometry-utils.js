@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import {
   pointcloudStride,
 } from './zine-constants.js';
+import {colors, rainbowColors, detectronColors} from './zine-colors.js';
 
 //
 
 const localVector = new THREE.Vector3();
+const localColor = new THREE.Color();
 
 //
 
@@ -516,4 +518,33 @@ export const reconstructPointCloudFromDepthField = (
     }
   }
   return pointCloud;
+};
+
+//
+
+export const getColorArrayFromValueArray = (mask) => {
+  const colorArray = new Float32Array(mask.length * 3);
+  for (let i = 0; i < mask.length; i++) {
+    const value = mask[i];
+    if (value !== -1) {
+      const c = localColor.setHex(colors[value % colors.length]);
+      colorArray[i * 3 + 0] = c.r;
+      colorArray[i * 3 + 1] = c.g;
+      colorArray[i * 3 + 2] = c.b;
+    }
+  }
+  return colorArray;
+};
+export const getHighlightArrayFromValueArray = (mask) => {
+  const colorArray = new Float32Array(mask.length * 3);
+  for (let i = 0; i < mask.length; i++) {
+    const value = mask[i];
+    const highlight = value !== 0;
+
+    const c = localColor.setHex(highlight ? 0xFFFFFF : 0x000000);
+    colorArray[i * 3 + 0] = c.r;
+    colorArray[i * 3 + 1] = c.g;
+    colorArray[i * 3 + 2] = c.b;
+  }
+  return colorArray;
 };

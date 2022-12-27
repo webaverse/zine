@@ -14,6 +14,8 @@ import {
   pointCloudArrayBufferToGeometry,
   decorateGeometryTriangleIds,
   depthFloat32ArrayToOrthographicGeometry,
+  getColorArrayFromValueArray,
+  getHighlightArrayFromValueArray,
 } from '../zine/zine-geometry-utils.js';
 import {
   setOrthographicCameraFromJson,
@@ -120,6 +122,15 @@ class SceneMaterial extends THREE.ShaderMaterial {
     });
   }
 }
+const reconstructValueMaskFromLabelsIndices = (labels, labelIndices) => {
+  const result = new Float32Array(labelIndices.length);
+  for (let i = 0; i < labelIndices.length; i++) {
+    const labelIndex = labelIndices[i];
+    const label = labels[labelIndex];
+    result[i] = label.value;
+  }
+  return result;
+};
 class SceneMesh extends THREE.Mesh {
   constructor({
     pointCloudArrayBuffer,
@@ -142,12 +153,16 @@ class SceneMesh extends THREE.Mesh {
       width,
       height,
     );
-    geometry.setAttribute('segment', new THREE.BufferAttribute(segmentSpecs.array, 1));
-    geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentSpecs.colorArray, 3));
-    geometry.setAttribute('plane', new THREE.BufferAttribute(planeSpecs.array, 1));
-    geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeSpecs.colorArray, 3));
-    // geometry.setAttribute('portal', new THREE.BufferAttribute(portalSpecs.array, 1));
-    geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalSpecs.colorArray, 3));
+    const segmentArray = reconstructValueMaskFromLabelsIndices(segmentSpecs.labels, segmentSpecs.labelIndices);
+    geometry.setAttribute('segment', new THREE.BufferAttribute(segmentArray, 1));
+    const segmentColor = getColorArrayFromValueArray(segmentArray);
+    geometry.setAttribute('segmentColor', new THREE.BufferAttribute(segmentColor, 3));
+    const planeArray = reconstructValueMaskFromLabelsIndices(planeSpecs.labels, planeSpecs.labelIndices);
+    geometry.setAttribute('plane', new THREE.BufferAttribute(planeArray, 1));
+    const planeColor = getColorArrayFromValueArray(planeArray);
+    geometry.setAttribute('planeColor', new THREE.BufferAttribute(planeColor, 3));
+    // const portalColor = getHighlightArrayFromValueArray(portalSpecs.array);
+    // geometry.setAttribute('portalColor', new THREE.BufferAttribute(portalColor, 3));
     const indexedGeometry = geometry;
     geometry = geometry.toNonIndexed();
     decorateGeometryTriangleIds(geometry);
@@ -161,6 +176,7 @@ class SceneMesh extends THREE.Mesh {
     sceneMesh.segmentSpecs = segmentSpecs;
     sceneMesh.planeSpecs = planeSpecs;
     sceneMesh.portalSpecs = portalSpecs;
+    sceneMesh.segmentArray = segmentArray;
     sceneMesh.firstFloorPlaneIndex = firstFloorPlaneIndex;
     sceneMesh.update = (selector) => {
       sceneMesh.material.uniforms.uMouseDown.value = +selector.mousedown;
@@ -343,14 +359,20 @@ class ScenePhysicsMesh extends THREE.Mesh {
       physicsPixelStride,
     );
 
-    // maintain segmentSpecs.array -> 'segments' attribute
-    const segments = new segmentSpecs.array.constructor( // Float32Array
-      segmentSpecs.array.length / (physicsPixelStride * physicsPixelStride)
+    // maintain strided segments attribute
+    const originalSegmentArray = reconstructValueMaskFromLabelsIndices(
+      segmentSpecs.labels,
+      segmentSpecs.labelIndices
     );
+    const segments = new originalSegmentArray.constructor( // Float32Array
+      originalSegmentArray.length / (physicsPixelStride * physicsPixelStride)
+    );
+
     // if (segments.length * 3 !== geometry.attributes.position.array.length) {
     //   console.log('mismatch', segments.length, geometry.attributes.position.array.length);
     //   debugger;
     // }
+
     const arrayBuffer = pointCloudArrayBuffer;
     const pixelStride = physicsPixelStride;
     for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
@@ -363,7 +385,7 @@ class ScenePhysicsMesh extends THREE.Mesh {
         }
       }
 
-      const s = segmentSpecs.array[i / pointcloudStride];
+      const s = originalSegmentArray[i / pointcloudStride];
       segments[j] = s;
 
       j++;

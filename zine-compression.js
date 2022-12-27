@@ -44,13 +44,6 @@ export class ZineStoryboardCompressor {
             }
             // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
             layer1.setData(key, compressedValue);
-
-            // test decompression
-            // if (type === 'depth') {
-            //   const compressedValue = layer1.getData(key);
-            //   const decompressedValue = await decompressDepth(compressedValue);
-            //   console.log('compare', value, decompressedValue);
-            // }
           }
         }
       }

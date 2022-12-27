@@ -450,7 +450,7 @@ const testDepthCompression = async () => {
 
 //
 
-const compressByteAttribute = async (byteAttribute) => {
+export const compressByteAttribute = async (byteAttribute) => {
   const numPoints = byteAttribute.length;
   
   const [

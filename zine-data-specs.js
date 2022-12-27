@@ -41,6 +41,13 @@ export const layer1Specs = [
   'edgeDepths',
   'paths',
 ];
+export const layer0CompressionSpecs = [
+  {
+    layer: 0,
+    key: mainImageKey,
+    type: 'image',
+  },
+];
 export const layer1CompressionSpecs = [
   {
     layer: 1,

@@ -99,13 +99,32 @@ function zbencode(o) {
           const addendumType = ADDENDUM_TYPES.get(o.constructor);
           addendumTypes.push(addendumType)
           return null;
+        } else if (Array.isArray(o)) {
+          if (o.length === 2 && typeof o[0] === 'string') {
+            recursionIndex++;
+            return [
+              o[0],
+              _recurseExtractAddendums(o[1]),
+            ];
+          } else {
+            const o2 = [];
+            for (let i = 0; i < o.length; i++) {
+              o2[i] = _recurseExtractAddendums(o[i]);
+            }
+            return o2;
+          }
+        } else if (typeof o === 'object' && o !== null) {
+          const o2 = {};
+          for (const k in o) {
+            o2[k] = _recurseExtractAddendums(o[k]);
+          }
+          return o2;
         } else {
           return o;
         }
       };
-      const s = JSON.stringify(o, function(k, v) {
-        return _recurseExtractAddendums(v);
-      });
+      o = _recurseExtractAddendums(o);
+      const s = JSON.stringify(o);
       let result;
       for (;;) {
         result = textEncoder.encodeInto(s, textUint8Array);

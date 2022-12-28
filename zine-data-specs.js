@@ -39,6 +39,7 @@ export const layer1Specs = [
   'candidateLocations',
   'predictedHeight',
   'edgeDepths',
+  'wallPlanes',
   'paths',
 ];
 export const layer0CompressionSpecs = [

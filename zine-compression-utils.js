@@ -260,19 +260,15 @@ export const decompressDepthQuantized = async (byteArray, maxDepth = 10000) => {
     // decoder.GetAttributeUInt16ForAllPoints(pc, indexAttribute, indexAttributeData);
 
     // copy data
-    const uint16Array = new Uint16Array(positionAttributeData.size());
-    for (let i = 0; i < uint16Array.length; i++) {
-      uint16Array[i] = positionAttributeData.GetValue(i);
-    }
     // const indexArray = new Uint16Array(indexAttributeData.size());
     // for (let i = 0; i < indexArray.length; i++) {
     //   indexArray[i] = indexAttributeData.GetValue(i);
     // }
 
     // decode back to float32
-    const float32Array = new Float32Array(uint16Array.length);
-    for (let i = 0; i < uint16Array.length; i++) {
-      const encodedDepth = uint16Array[i];
+    const float32Array = new Float32Array(positionAttributeData.size());
+    for (let i = 0; i < float32Array.length; i++) {
+      const encodedDepth = positionAttributeData.GetValue(i);
       const depth = encodedDepth / 65535 * maxDepth;
       float32Array[i] = depth;
     }

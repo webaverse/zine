@@ -88,6 +88,11 @@ function zbencode(o) {
       let recursionIndex = 0;
       const _recurseExtractAddendums = o => {
         recursionIndex++;
+
+        if (o === undefined) {
+          throw new Error('zjs: found undefined value; if you want to encode undefined, use null instead');
+        }
+        
         if (_isAddendumEncodable(o)) {
           addendums.push(o);
           addendumIndexes.push(recursionIndex);

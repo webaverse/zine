@@ -48,6 +48,7 @@ const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
+const localColor = new THREE.Color();
 
 //
 
@@ -456,6 +457,85 @@ class FloorNetMesh extends THREE.Mesh {
 
 //
 
+class EdgeDepthMesh extends THREE.InstancedMesh {
+  constructor({
+    edgeDepths,
+    width,
+    height,
+  }) {
+    const depthCubesGeometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
+    // instanced color attribute
+    const maxSize = width + width + height + height +
+      2 * 4; // min/max for each edge
+    const colors = new Float32Array(maxSize * 3);
+    depthCubesGeometry.setAttribute('color', new THREE.InstancedBufferAttribute(colors, 3, false));
+    const depthCubesMaterial = new THREE.MeshBasicMaterial({
+      // color: 0x0000FF,
+      vertexColors: true,
+    });
+
+    super(depthCubesGeometry, depthCubesMaterial, maxSize);
+    const depthCubesMesh = this;
+    depthCubesMesh.count = 0;
+    depthCubesMesh.frustumCulled = false;
+    let index = 0;
+    [
+      edgeDepths.tops,
+      edgeDepths.bottoms,
+      edgeDepths.lefts,
+      edgeDepths.rights,
+    ].forEach(ps => {
+      for (let i = 0; i < ps.length; i++) {
+        const pointArray = ps[i];
+        localMatrix.compose(
+          localVector.fromArray(pointArray),
+          localQuaternion.identity(),
+          localVector2.set(1, 1, 1)
+        );
+        depthCubesMesh.setMatrixAt(index, localMatrix);
+        localColor.setHex(0x0000FF)
+          .toArray(colors, index * 3);
+        index++;
+        depthCubesMesh.count++;
+      }
+    });
+    [
+      edgeDepths.top,
+      edgeDepths.bottom,
+      edgeDepths.left,
+      edgeDepths.right,
+    ].forEach(point => {
+      // min
+      localMatrix.compose(
+        localVector.fromArray(point.min),
+        localQuaternion.identity(),
+        localVector2.set(4, 4, 4)
+      );
+      depthCubesMesh.setMatrixAt(index, localMatrix);
+      localColor.setHex(0xFF0000)
+          .toArray(colors, index * 3);
+      index++;
+      depthCubesMesh.count++;
+
+      // max
+      localMatrix.compose(
+        localVector.fromArray(point.max),
+        localQuaternion.identity(),
+        localVector2.set(2, 2, 2)
+      );
+      depthCubesMesh.setMatrixAt(index, localMatrix);
+      localColor.setHex(0xFF0000)
+          .toArray(colors, index * 3);
+      index++;
+      depthCubesMesh.count++;
+    });
+
+    depthCubesMesh.instanceMatrix.needsUpdate = true;
+  }
+}
+
+//
+
 export class ZineRenderer extends EventTarget {
   constructor({
     panel,
@@ -517,82 +597,14 @@ export class ZineRenderer extends EventTarget {
     this.transformScene = transformScene;
 
     // render edge depths
-    {
-      const depthCubesGeometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
-      const depthCubesMaterial = new THREE.MeshBasicMaterial({
-        color: 0x0000FF,
-        // vertexColors: true,
-      });
-
-      // console.log('render edge depth resolution', width, height, resolution);
-      const depthCubesMesh = new THREE.InstancedMesh(
-        depthCubesGeometry,
-        depthCubesMaterial,
-        width + width + height + height
-      );
-      depthCubesMesh.count = 0;
-      depthCubesMesh.frustumCulled = false;
-      let index = 0;
-      [
-        edgeDepths.tops,
-        edgeDepths.bottoms,
-        edgeDepths.lefts,
-        edgeDepths.rights,
-      ].forEach(ps => {
-        for (let i = 0; i < ps.length; i++) {
-          const pointArray = ps[i];
-          localMatrix.makeTranslation(pointArray[0], pointArray[1], pointArray[2])
-          depthCubesMesh.setMatrixAt(index++, localMatrix);
-          depthCubesMesh.count++;
-        }
-      });
-      depthCubesMesh.instanceMatrix.needsUpdate = true;
-      this.transformScene.add(depthCubesMesh);
-      depthCubesMesh.updateMatrixWorld();
-    }
-    {
-      const depthCubesGeometry2 = new THREE.BoxGeometry(0.01, 0.01, 0.01);
-      const depthCubesMaterial2 = new THREE.MeshBasicMaterial({
-        color: 0xFF0000,
-        // vertexColors: true,
-      });
-
-      const depthCubesMesh2 = new THREE.InstancedMesh(
-        depthCubesGeometry2,
-        depthCubesMaterial2,
-        width + width + height + height
-      );
-      depthCubesMesh2.count = 0;
-      depthCubesMesh2.frustumCulled = false;
-      let index = 0;
-      [
-        edgeDepths.top,
-        edgeDepths.bottom,
-        edgeDepths.left,
-        edgeDepths.right,
-      ].forEach(point => {
-        // min
-        localMatrix.compose(
-          new THREE.Vector3().fromArray(point.min),
-          new THREE.Quaternion(),
-          new THREE.Vector3(4, 4, 4)
-        );
-        depthCubesMesh2.setMatrixAt(index++, localMatrix);
-        depthCubesMesh2.count++;
-
-        // max
-        localMatrix.compose(
-          new THREE.Vector3().fromArray(point.max),
-          new THREE.Quaternion(),
-          new THREE.Vector3(2, 2, 2)
-        );
-        depthCubesMesh2.setMatrixAt(index++, localMatrix);
-        depthCubesMesh2.count++;
-      });
-      depthCubesMesh2.instanceMatrix.needsUpdate = true;
-      this.transformScene.add(depthCubesMesh2);
-      depthCubesMesh2.updateMatrixWorld();
-    }
+    const edgeDepthMesh = new EdgeDepthMesh({
+      edgeDepths,
+      width,
+      height,
+    });
+    this.transformScene.add(edgeDepthMesh);
+    edgeDepthMesh.updateMatrixWorld();
+    this.edgeDepthMesh = edgeDepthMesh;
 
     // camera
     const camera = makeDefaultCamera();

@@ -229,10 +229,12 @@ export class ZineStoryboard extends EventTarget {
   }
   async loadAsync(uint8Array) {
     this.#loadUncompressed(uint8Array);
-    const zineStoryboardClone = this.clone();
-    const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
-    // console.log('load compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
     const compressor = new ZineStoryboardCompressor();
+
+    // // XXX debugging
+    // const keySizes = measureKeys(this.zd.data);
+    // console.log('got key sizes', keySizes, this.zd.data);
+
     await compressor.decompress(this);
   }
   #loadUncompressed(uint8Array) {
@@ -240,10 +242,8 @@ export class ZineStoryboard extends EventTarget {
   }
   async exportAsync() {
     const zineStoryboardClone = this.clone();
-    const layer1 = zineStoryboardClone.getPanel(0).getLayer(1);
     const compressor = new ZineStoryboardCompressor();
     await compressor.compress(zineStoryboardClone);
-    // console.log('export compressed zine', layer1, layer1.getData('depthField'), layer1.getData('floorNetDepths'));
     return zineStoryboardClone.#exportUncompressed();
   }
   #exportUncompressed() {

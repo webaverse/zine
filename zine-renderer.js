@@ -595,6 +595,7 @@ export class ZineRenderer extends EventTarget {
     const candidateLocations = layer1.getData('candidateLocations');
     const predictedHeight = layer1.getData('predictedHeight');
     const edgeDepths = layer1.getData('edgeDepths');
+    const wallPlanes = layer1.getData('wallPlanes');
     const paths = layer1.getData('paths');
 
     const [
@@ -626,6 +627,19 @@ export class ZineRenderer extends EventTarget {
     this.transformScene.add(edgeDepthMesh);
     edgeDepthMesh.updateMatrixWorld();
     this.edgeDepthMesh = edgeDepthMesh;
+
+    // render wall plane meshes
+    this.wallPlaneMeshes = [];
+    for (let i = 0; i < wallPlanes.length; i++) {
+      const wallPlane = wallPlanes[i];
+      const wallPlaneMesh = new WallPlaneMesh(wallPlane);
+      wallPlaneMesh.position.fromArray(wallPlane.position);
+      wallPlaneMesh.quaternion.fromArray(wallPlane.quaternion);
+      wallPlaneMesh.visible = false;
+      this.transformScene.add(wallPlaneMesh);
+      wallPlaneMesh.updateMatrixWorld();
+      this.wallPlaneMeshes.push(wallPlaneMesh);
+    }
 
     // camera
     const camera = makeDefaultCamera();

@@ -57,6 +57,9 @@ export class ZineStoryboardCompressor {
               }
               // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
               layer.setData(key, compressedValue);
+            } else {
+              console.warn('value was undefined', key, type, value, new Error().stack);
+              throw new Error('value was undefined');
             }
           }
         }
@@ -74,15 +77,16 @@ export class ZineStoryboardCompressor {
           const compressionSpec = layer1CompressionSpecs[j];
 
           const {key, type} = compressionSpec;
+          // console.log('decompressing', {key, type});
           const value = layer1.getData(key);
           if (value !== undefined) {
             // console.log('had decompressible data', key, type, value);
             let decompressedValue;
             if (type === 'pointCloud') {
               decompressedValue = await decompressPointCloud(value);
-              if (decompressedValue.byteOffset !== 0) {
-                throw new Error('unexpected byteOffset');
-              }
+              // if (decompressedValue.byteOffset !== 0) {
+              //   throw new Error('unexpected byteOffset');
+              // }
               decompressedValue = decompressedValue.buffer;
             } else if (type === 'depthQuantized') {
               decompressedValue = await decompressDepthQuantized(value);
@@ -97,6 +101,9 @@ export class ZineStoryboardCompressor {
             }
             // console.log('decompressed', key, type, value, decompressedValue);
             layer1.setData(key, decompressedValue);
+          } else {
+            console.warn('value was undefined', key, type, value, new Error().stack);
+            throw new Error('value was undefined');
           }
         }
       }

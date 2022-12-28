@@ -547,8 +547,8 @@ class WallPlaneMesh extends THREE.Mesh {
     const material = new THREE.MeshPhongMaterial({
       color,
       transparent: true,
-      opacity: 0.2,
-      side: THREE.DoubleSide,
+      opacity: 0.3,
+      // side: THREE.DoubleSide,
     });
     super(geometry, material);
     this.frustumCulled = false;

@@ -205,9 +205,6 @@ function zbdecode(uint8Array) {
     index += Uint32Array.BYTES_PER_ELEMENT;
     
     const TypedArrayCons = ADDENDUM_CONSTRUCTORS[addendumType];
-    /* if (!TypedArrayCons) {
-      console.warn('failed to find typed array cons for', addendumType);
-    } */
     const addendum = TypedArrayCons(
       uint8Array.buffer,
       uint8Array.byteOffset + index,

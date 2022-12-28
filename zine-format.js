@@ -97,6 +97,48 @@ function keyPathEquals(a, b) {
 //     prefix.every((key, i) => keyPath[i] === key);
 // }
 
+/* globalThis.measureKeys = a => {
+  const result = [];
+  const traverse = (value, keyPath = '') => {
+    let size = 0;
+    if ([
+      ArrayBuffer,
+      Uint8Array,
+      Int8Array,
+      Uint16Array,
+      Int16Array,
+      Uint32Array,
+      Int32Array,
+      Float32Array,
+      Float64Array,
+    ].some(c => value instanceof c)) {
+      size = value.byteLength;
+    }
+    if (size > 0) {
+      result.push([keyPath, size]);
+    }
+
+    if (Array.isArray(value)) {
+      if (Array.isArray(value) && value.length === 2 && typeof value[0] === 'string') {
+        traverse(value[1], keyPath + '.' + value[0]);
+      } else {
+        for (let i = 0; i < value.length; i++) {
+          traverse(value[i], keyPath + '[' + i + ']');
+        }
+      }
+    } else if (typeof value === 'object' && value !== null) {
+      for (const key2 in value) {
+        traverse(value[key2], keyPath + '.' + key2);
+      }
+    } else {
+      // nothing
+    }
+  };
+  traverse(a);
+  result.sort((a, b) => b[1] - a[1]);
+  return result;
+}; */
+
 export class ZineStoryboard extends EventTarget {
   constructor() {
     super();

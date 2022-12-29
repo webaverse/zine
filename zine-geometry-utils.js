@@ -11,6 +11,40 @@ const localColor = new THREE.Color();
 
 //
 
+export function bilinearInterpolate(
+  values,
+  width,
+  height,
+  px,
+  pz,
+) {
+  // first, compute the sample coordinates:
+  const x = Math.floor(px * width);
+  const z = Math.floor(pz * height);
+  const x1 = Math.min(x + 1, width - 1);
+  const z1 = Math.min(z + 1, height - 1);
+  const index = z * width + x;
+  const index1 = z * width + x1;
+  const index2 = z1 * width + x;
+  const index3 = z1 * width + x1;
+  
+  // then, compute the interpolation coefficients:
+  const fx = px * width - x;
+  const fz = pz * height - z;
+  const fx1 = 1 - fx;
+  const fz1 = 1 - fz;
+
+  // and finally, interpolate:
+  return (
+    values[index] * fx1 * fz1 +
+    values[index1] * fx * fz1 +
+    values[index2] * fx1 * fz +
+    values[index3] * fx * fz
+  );
+}
+
+//
+
 function pointCloudArrayBufferToPositionAttributeArray(
   arrayBuffer,
   width,

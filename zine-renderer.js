@@ -766,7 +766,7 @@ export class ZineRenderer extends EventTarget {
     const position = layer1.getData('position');
     const quaternion = layer1.getData('quaternion');
     const scale = layer1.getData('scale');
-    
+
     this.transformScene.position.fromArray(position);
     this.transformScene.quaternion.fromArray(quaternion);
     this.transformScene.scale.fromArray(scale);
@@ -774,6 +774,85 @@ export class ZineRenderer extends EventTarget {
 
     this.dispatchEvent(new MessageEvent('transformchange'));
   }
+
+  /**
+   * Get a portion of a zine image by specifying a center,
+   * width and height.
+   *
+   * @param {number} sx Screen-space x coordinate
+   * @param {number} sy Screen-space y coordinate
+   * @param {number} width Width of the image
+   * @param {number} height Height of the image
+   * @return {Promise} Resolves to an image
+   */
+  async getColorImage(
+    sx = 0,
+    sy = 0,
+    width = 128,
+    height = 128,
+  ) {
+    // Get zine image.
+    const {image} = this.sceneMesh.material.uniforms.map.value;
+
+    // Convert screen space coordinates to pixel coordinates.
+    let x = Math.round((sx + 1) / 2 * image.width);
+    let y = Math.round((sy + 1) / 2 * image.height);
+
+    // We will create a bounding box around this coordinate.
+
+    // Adjust the coordinate to ensure that the bounding box
+    // is within the image.
+    if ( x + width / 2 > image.width ) {
+      x = image.width - width / 2;
+    } else if ( x - width / 2 < 0 ) {
+      x = width / 2;
+    }
+
+    if ( y + height / 2 > image.height ) {
+      y = image.height - height / 2;
+    } else if ( y - height / 2 < 0 ) {
+      y = height / 2;
+    }
+
+    // Convert to bitmap.
+    const bmp = await createImageBitmap(
+      image,
+      x - width / 2,
+      y - height / 2,
+      width,
+      height,
+      // Image is flipped vertically.
+      {imageOrientation: 'flipY'},
+    );
+
+    // Create a canvas to draw the image on.
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    // Blit the image to the canvas.
+    const ctx = canvas.getContext('bitmaprenderer');
+    ctx.transferFromImageBitmap(bmp);
+
+    // Return a blob.
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(resolve, 'image/jpeg');
+    });
+  }
+
+  async getColorImageFromPosition(
+    position = new THREE.Vector3(),
+    width,
+    height
+  ) {
+    // Map position to screen space.
+    const {x,y} = position
+      .clone()
+      .project(this.camera);
+
+    return this.getColorImage(x,y,width,height);
+  }
+
   getScale() {
     const layer1 = this.panel.getLayer(1);
     const scale = layer1.getData('scale');

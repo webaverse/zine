@@ -42,6 +42,50 @@ export function bilinearInterpolate(
     values[index3] * fx * fz
   );
 }
+export const bilinearInterpolate3 = (() => {
+  const localVector = new THREE.Vector3();
+  const localVector2 = new THREE.Vector3();
+  const localVector3 = new THREE.Vector3();
+  const localVector4 = new THREE.Vector3();
+  const localVector5 = new THREE.Vector3();
+
+  return (
+    values,
+    width,
+    height,
+    px,
+    pz,
+    targetVector,
+  ) => {
+    // first, compute the sample coordinates:
+    const x = Math.floor(px * (width - 1));
+    const z = Math.floor(pz * (height - 1));
+    const x1 = Math.min(x + 1, width - 1);
+    const z1 = Math.min(z + 1, height - 1);
+    const index = (z * width + x) * 3;
+    const index1 = (z * width + x1) * 3;
+    const index2 = (z1 * width + x) * 3;
+    const index3 = (z1 * width + x1) * 3;
+    
+    // then, compute the interpolation coefficients:
+    const fx = px * width - x;
+    const fz = pz * height - z;
+    const fx1 = 1 - fx;
+    const fz1 = 1 - fz;
+
+    // look up the points:
+    const p1 = localVector.fromArray(values, index);
+    const p2 = localVector2.fromArray(values, index1);
+    const p3 = localVector3.fromArray(values, index2);
+    const p4 = localVector4.fromArray(values, index3);
+
+    // and finally, interpolate:
+    return targetVector.copy(p1).multiplyScalar(fx1 * fz1)
+      .add(localVector5.copy(p2).multiplyScalar(fx * fz1))
+      .add(localVector5.copy(p3).multiplyScalar(fx1 * fz))
+      .add(localVector5.copy(p4).multiplyScalar(fx * fz));
+  };
+})();
 
 //
 

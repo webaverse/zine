@@ -90,65 +90,118 @@ export const bilinearInterpolate3 = (() => {
 //
 
 function pointCloudArrayBufferToPositionAttributeArray(
-  arrayBuffer,
+  srcArrayBuffer,
   width,
   height,
   scaleFactor,
-  float32Array,
-  pixelStride = 1,
-) { // result in float32Array
-  const dataView = new DataView(arrayBuffer);
-  for (let i = 0, j = 0; i < arrayBuffer.byteLength; i += pointcloudStride) {
-    if (pixelStride !== 1) {
-      const i2 = i / pointcloudStride;
-      const sx = i2 % width;
-      const sy = Math.floor(i2 / width);
-      if (sx % pixelStride !== 0 || sy % pixelStride !== 0) { // skip non-stride points
-        continue;
-      }
-    }
-
-    let x = dataView.getFloat32(i + 0, true);
-    let y = dataView.getFloat32(i + 4, true);
-    let z = dataView.getFloat32(i + 8, true);
+  dstFloat32Array,
+) { 
+  const srcFloat32Array = new Float32Array(srcArrayBuffer);
+  for (let i = 0, j = 0; i < srcFloat32Array.length; i += 3) {
+    let x = srcFloat32Array[i];
+    let y = srcFloat32Array[i + 1];
+    let z = srcFloat32Array[i + 2];
 
     x *= scaleFactor;
     y *= -scaleFactor;
     z *= -scaleFactor;
 
-    float32Array[j + 0] = x;
-    float32Array[j + 1] = y;
-    float32Array[j + 2] = z;
+    dstFloat32Array[j + 0] = x;
+    dstFloat32Array[j + 1] = y;
+    dstFloat32Array[j + 2] = z;
 
     j += 3;
   }
 }
-export function pointCloudArrayBufferToGeometry(arrayBuffer, width, height, pixelStride = 1) {
-  // check that pixelStride is a power of 2
-  if (pixelStride & (pixelStride - 1)) {
-    throw new Error('pixelStride must be a power of 2');
-  }
+export function pointCloudArrayBufferToPositionAttributeArrayResized(
+  srcArrayBuffer,
+  width,
+  height,
+  targetWidth,
+  targetHeight,
+  scaleFactor,
+  dstFloat32Array,
+) {
+  console.log('got src array buffer', {
+    srcArrayBuffer,
+  });
+  const srcFloat32Array = new Float32Array(srcArrayBuffer);
+  for (let dy = 0; dy < targetHeight; dy++) {
+    for (let dx = 0; dx < targetWidth; dx++) {
+      // bilinear interpolate
+      const px = dx / (targetWidth - 1);
+      const py = dy / (targetHeight - 1);
 
+      bilinearInterpolate3(
+        srcFloat32Array,
+        width,
+        height,
+        px,
+        py,
+        localVector,
+      );
+
+      let {x, y, z} = localVector;
+      if (isNaN(x) || isNaN(y) || isNaN(z)) {
+        console.warn('got NaN', {x, y, z, srcFloat32Array, width, height, px, py, localVector});
+        debugger;
+      }
+      x *= scaleFactor;
+      y *= -scaleFactor;
+      z *= -scaleFactor;
+
+      const dstIndex = (dy * targetWidth + dx) * 3;
+      dstFloat32Array[dstIndex] = x;
+      dstFloat32Array[dstIndex + 1] = y;
+      dstFloat32Array[dstIndex + 2] = z;
+    }
+  }
+  
+  // for (let i = 0, j = 0; i < srcArrayBuffer.byteLength; i += pointcloudStride) {
+  //   let x = srcDataView.getFloat32(i + 0, true);
+  //   let y = srcDataView.getFloat32(i + 4, true);
+  //   let z = srcDataView.getFloat32(i + 8, true);
+
+  //   x *= scaleFactor;
+  //   y *= -scaleFactor;
+  //   z *= -scaleFactor;
+
+  //   dstFloat32Array[j + 0] = x;
+  //   dstFloat32Array[j + 1] = y;
+  //   dstFloat32Array[j + 2] = z;
+
+  //   j += 3;
+  // }
+}
+export function pointCloudArrayBufferToGeometry(
+  arrayBuffer,
+  width,
+  height,
+  targetWidth = width,
+  targetHeight = height,
+) {
   const scaleFactor = 1 / width;
   
-  const width2 = width / pixelStride;
-  const height2 = height / pixelStride;
+  // const width2 = width / pixelStride;
+  // const height2 = height / pixelStride;
 
-  // check that width and height are whole
-  if (width2 % 1 !== 0 || height2 % 1 !== 0) {
-    throw new Error('width and height must be whole after division by pixelStride');
-  }
+  // // check that width and height are whole
+  // if (width2 % 1 !== 0 || height2 % 1 !== 0) {
+  //   throw new Error('width and height must be whole after division by pixelStride');
+  // }
 
-  const widthSegments = width2 - 1;
-  const heightSegments = height2 - 1;
+  const widthSegments = targetWidth - 1;
+  const heightSegments = targetHeight - 1;
   let geometry = new THREE.PlaneGeometry(1, 1, widthSegments, heightSegments);
-  pointCloudArrayBufferToPositionAttributeArray(
+  // interpolate instead of striding, to support different resolutions
+  pointCloudArrayBufferToPositionAttributeArrayResized(
     arrayBuffer,
     width,
     height,
+    targetWidth,
+    targetHeight,
     scaleFactor,
     geometry.attributes.position.array,
-    pixelStride,
   );
   return geometry;
 }

@@ -833,6 +833,9 @@ export class ZineRenderer extends EventTarget {
     const ctx = canvas.getContext('bitmaprenderer');
     ctx.transferFromImageBitmap(bmp);
 
+    // Clean up.
+    bmp.close();
+
     // Return a blob.
     return new Promise((resolve, reject) => {
       canvas.toBlob(resolve, 'image/jpeg');

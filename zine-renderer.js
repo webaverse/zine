@@ -816,23 +816,23 @@ export class ZineRenderer extends EventTarget {
       {imageOrientation: 'flipY'},
     );
 
-    // Create a canvas to draw the image on.
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
+    // Create an offscreen canvas to draw the image on.
+    const canvas = new OffscreenCanvas(w, h);
 
     // Blit the image to the canvas.
     const ctx = canvas.getContext('bitmaprenderer');
     ctx.transferFromImageBitmap(bmp);
 
+    // Get blob.
+    const blob = await canvas.convertToBlob({
+      quality: 1,
+      type: 'image/jpeg',
+    });
+
     // Clean up.
     bmp.close();
-    canvas.remove();
 
-    // Return a blob.
-    return new Promise((resolve, reject) => {
-      canvas.toBlob(resolve, 'image/jpeg');
-    });
+    return blob;
   }
 
   async getColorImageFromPosition(

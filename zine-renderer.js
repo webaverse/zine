@@ -825,7 +825,7 @@ export class ZineRenderer extends EventTarget {
 
     // Get blob.
     const blob = await canvas.convertToBlob({
-      quality: 1,
+      quality: 0.5,
       type: 'image/jpeg',
     });
 

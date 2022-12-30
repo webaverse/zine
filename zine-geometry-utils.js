@@ -122,9 +122,6 @@ export function pointCloudArrayBufferToPositionAttributeArrayResized(
   scaleFactor,
   dstFloat32Array,
 ) {
-  console.log('got src array buffer', {
-    srcArrayBuffer,
-  });
   const srcFloat32Array = new Float32Array(srcArrayBuffer);
   for (let dy = 0; dy < targetHeight; dy++) {
     for (let dx = 0; dx < targetWidth; dx++) {
@@ -142,10 +139,10 @@ export function pointCloudArrayBufferToPositionAttributeArrayResized(
       );
 
       let {x, y, z} = localVector;
-      if (isNaN(x) || isNaN(y) || isNaN(z)) {
-        console.warn('got NaN', {x, y, z, srcFloat32Array, width, height, px, py, localVector});
-        debugger;
-      }
+      // if (isNaN(x) || isNaN(y) || isNaN(z)) {
+      //   console.warn('got NaN', {x, y, z, srcFloat32Array, width, height, px, py, localVector});
+      //   debugger;
+      // }
       x *= scaleFactor;
       y *= -scaleFactor;
       z *= -scaleFactor;

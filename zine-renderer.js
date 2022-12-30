@@ -6,6 +6,7 @@ import {
 import {
   // makePromise,
   makeDefaultCamera,
+  range,
 } from './zine-utils.js';
 import {
   reconstructPointCloudFromDepthField,
@@ -801,17 +802,8 @@ export class ZineRenderer extends EventTarget {
 
     // Adjust the coordinate to ensure that the bounding box
     // is within the image.
-    if ( x + w / 2 > image.width ) {
-      x = image.width - w / 2;
-    } else if ( x - w / 2 < 0 ) {
-      x = w / 2;
-    }
-
-    if ( y + h / 2 > image.height ) {
-      y = image.height - h / 2;
-    } else if ( y - h / 2 < 0 ) {
-      y = h / 2;
-    }
+    x = range(x, w / 2, image.width - w / 2);
+    y = range(y, h / 2, image.height - h / 2);
 
     // Convert to bitmap.
     const bmp = await createImageBitmap(
@@ -835,6 +827,7 @@ export class ZineRenderer extends EventTarget {
 
     // Clean up.
     bmp.close();
+    canvas.remove();
 
     // Return a blob.
     return new Promise((resolve, reject) => {

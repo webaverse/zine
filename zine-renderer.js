@@ -785,12 +785,7 @@ export class ZineRenderer extends EventTarget {
    * @param {number} height Height of the image
    * @return {Promise} Resolves to an image
    */
-  async getColorImage(
-    sx = 0,
-    sy = 0,
-    width = 128,
-    height = 128,
-  ) {
+  async getColorImage(sx = 0, sy = 0, width, height) {
     // Get zine image.
     const {image} = this.sceneMesh.material.uniforms.map.value;
 
@@ -798,37 +793,41 @@ export class ZineRenderer extends EventTarget {
     let x = Math.round((sx + 1) / 2 * image.width);
     let y = Math.round((sy + 1) / 2 * image.height);
 
+    // Get width and height, defaulting to image dimensions.
+    const w = width ?? image.width;
+    const h = height ?? image.height;
+
     // We will create a bounding box around this coordinate.
 
     // Adjust the coordinate to ensure that the bounding box
     // is within the image.
-    if ( x + width / 2 > image.width ) {
-      x = image.width - width / 2;
-    } else if ( x - width / 2 < 0 ) {
-      x = width / 2;
+    if ( x + w / 2 > image.width ) {
+      x = image.width - w / 2;
+    } else if ( x - w / 2 < 0 ) {
+      x = w / 2;
     }
 
-    if ( y + height / 2 > image.height ) {
-      y = image.height - height / 2;
-    } else if ( y - height / 2 < 0 ) {
-      y = height / 2;
+    if ( y + h / 2 > image.height ) {
+      y = image.height - h / 2;
+    } else if ( y - h / 2 < 0 ) {
+      y = h / 2;
     }
 
     // Convert to bitmap.
     const bmp = await createImageBitmap(
       image,
-      x - width / 2,
-      y - height / 2,
-      width,
-      height,
+      x - w / 2,
+      y - h / 2,
+      w,
+      h,
       // Image is flipped vertically.
       {imageOrientation: 'flipY'},
     );
 
     // Create a canvas to draw the image on.
     const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = w;
+    canvas.height = h;
 
     // Blit the image to the canvas.
     const ctx = canvas.getContext('bitmaprenderer');

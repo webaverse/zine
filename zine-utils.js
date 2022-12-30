@@ -76,6 +76,23 @@ export const makeFloorNetCamera = () => {
   floorNetCamera.updateMatrixWorld();
   return floorNetCamera;
 };
+export const makeMapIndexCamera = () => {
+  const floorNetCamera = new THREE.OrthographicCamera(
+    -floorNetWorldSize / 2,
+    floorNetWorldSize / 2,
+    floorNetWorldSize / 2,
+    -floorNetWorldSize / 2,
+    0,
+    floorNetWorldDepth
+  );
+  floorNetCamera.position.set(0, -floorNetWorldDepth/2, 0);
+  floorNetCamera.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2)
+    .multiply(
+      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI)
+    );
+  floorNetCamera.updateMatrixWorld();
+  return floorNetCamera;
+};
 
 //
 

@@ -332,10 +332,53 @@ export class ZinePanel extends EventTarget {
   #layers = [];
   #unlisten;
   #init() {
-    this.#layers = this.getKeys().map(id => {
+    const keys = this.getKeys();
+    for (const id of keys) {
       const keyPath = this.prefix.concat([id]);
-      return new ZineLayer(this.zd, keyPath);
-    })
+      const layer = new ZineLayer(this.zd, keyPath);
+      this.#addLayer(layer);
+    }
+  }
+  #addLayer(layer) {
+    this.#layers.push(layer);
+
+    const keyPath = layer.prefix;
+    layer.addEventListener('update', e => {
+      this.dispatchEvent(new MessageEvent('layerupdate', {
+        data: {
+          keyPath,
+          layer,
+        },
+      }));
+    });
+
+    this.dispatchEvent(new MessageEvent('layeradd', {
+      data: {
+        keyPath,
+        layer,
+      },
+    }));
+  }
+  #removeLayer(layer) {
+    layer.destroy();
+    this.#layers[index] = undefined;
+
+    // shave the tail
+    for (let i = this.#layers.length - 1; i >= 0; i--) {
+      if (this.#layers[i] !== undefined) {
+        break;
+      } else {
+        this.#layers.pop();
+      }
+    }
+
+    const keyPath = layer.prefix;
+    this.dispatchEvent(new MessageEvent('layerremove', {
+      data: {
+        keyPath,
+        layer,
+      },
+    }));
   }
   #listen() {
     const onadd = e => {
@@ -349,23 +392,7 @@ export class ZinePanel extends EventTarget {
         keyPath,
       } = e.data;
       const layer = new ZineLayer(this.zd, keyPath);
-      this.#layers.push(layer);
-
-      layer.addEventListener('update', e => {
-        this.dispatchEvent(new MessageEvent('layerupdate', {
-          data: {
-            keyPath,
-            layer,
-          },
-        }));
-      });
-
-      this.dispatchEvent(new MessageEvent('layeradd', {
-        data: {
-          keyPath,
-          layer,
-        },
-      }));
+      this.#addLayer(layer);
     };
     this.zd.addEventListener('add', onadd);
 
@@ -377,24 +404,7 @@ export class ZinePanel extends EventTarget {
       } = e.data;
       const index = keyPath[0];
       const layer = this.#layers[index];
-      layer.destroy();
-      this.#layers[index] = undefined;
-
-      // shave the tail
-      for (let i = this.#layers.length - 1; i >= 0; i--) {
-        if (this.#layers[i] !== undefined) {
-          break;
-        } else {
-          this.#layers.pop();
-        }
-      }
-
-      this.dispatchEvent(new MessageEvent('layerremove', {
-        data: {
-          keyPath,
-          layer,
-        },
-      }));
+      this.#removeLayer(layer);
     };
     this.zd.addEventListener('remove', onremove);
 
@@ -434,11 +444,6 @@ export class ZinePanel extends EventTarget {
 class ZineLayer extends EventTarget {
   constructor(zd, prefix) {
     super();
-
-    // if (!zd) {
-    //   console.warn('no zd b', this);
-    //   debugger;
-    // }
 
     this.zd = zd;
     this.prefix = prefix;

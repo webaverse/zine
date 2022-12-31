@@ -99,10 +99,13 @@ export class ZineCompressionServer {
                 transfers = [decompressedValue.buffer];
               } else if (type === 'depth') {
                 decompressedValue = await decompressDepth(value);
+                transfers = [decompressedValue.buffer];
               } else if (type === 'byteAttribute') {
                 decompressedValue = await decompressByteAttribute(value);
+                transfers = [decompressedValue.buffer];
               } else if (type === 'generic') {
                 decompressedValue = await decompressGeneric(value);
+                transfers = [decompressedValue.buffer];
               } else {
                 throw new Error('unknown compression type: ' + type);
               }

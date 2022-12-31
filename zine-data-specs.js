@@ -17,6 +17,7 @@ export const layer1Specs = [
   'quaternion',
   'scale',
   'cameraJson',
+  'boundingBox',
   'depthFieldHeaders',
   'depthField',
   'planesJson',

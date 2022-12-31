@@ -11,19 +11,11 @@ import {
   compressGeneric,
   decompressGeneric,
 } from './zine-compression-utils.js';
-// import {
-//   layer0CompressionSpecs,
-//   layer1CompressionSpecs,
-// } from './zine-data-specs.js';
 
 //
 
 const maxDepth = 10000;
 const quantization = 16;
-// const layersCompressionSpecs = [
-//   layer0CompressionSpecs,
-//   layer1CompressionSpecs,
-// ];
 
 //
 

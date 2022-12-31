@@ -59,29 +59,55 @@ export class ZineCompressionClient {
     this.nextWorkerIndex = 0;
 
     this.cbs = new Map();
+
+    this.semaphoreValue = this.workers.length;
+    this.queue = [];
   }
   async request(method, args, {transfers} = {}) {
-    const id = makeId();
-    
-    const promise = makePromise();
-    this.cbs.set(id, (error, result) => {
-      if (!error) {
-        promise.accept(result);
-      } else {
-        promise.reject(error);
-      }
-    });
-    
-    const worker = this.workers[this.nextWorkerIndex];
-    worker.port.postMessage({
-      id,
-      method,
-      args,
-    }, transfers);
-    this.nextWorkerIndex = (this.nextWorkerIndex + 1) % this.workers.length;
+    if (this.semaphoreValue > 0) {
+      this.semaphoreValue--;
+      try {
+        const id = makeId();
+        
+        const promise = makePromise();
+        this.cbs.set(id, (error, result) => {
+          if (!error) {
+            promise.accept(result);
+          } else {
+            promise.reject(error);
+          }
+        });
+        
+        const worker = this.workers[this.nextWorkerIndex];
+        worker.port.postMessage({
+          id,
+          method,
+          args,
+        }, transfers);
+        this.nextWorkerIndex = (this.nextWorkerIndex + 1) % this.workers.length;
 
-    const result = await promise;
-    return result;
+        const result = await promise;
+        return result;
+      } finally {
+        this.semaphoreValue++;
+
+        if (this.queue.length > 0) {
+          const {method, args, transfers, accept, reject} = this.queue.shift();
+          this.request(method, args, {transfers})
+            .then(accept, reject);
+        }
+      }
+    } else {
+      return new Promise((accept, reject) => {
+        this.queue.push({
+          method,
+          args,
+          transfers,
+          accept,
+          reject,
+        });
+      });
+    }
   }
   async compress(type, value, {transfers} = {}) {
     const result = await this.request('compress', {

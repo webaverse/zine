@@ -19,7 +19,7 @@ export const compressImage = async imageArrayBuffer => {
   // encode as webp
   const webpBlob = await canvas.convertToBlob({
     type: 'image/webp',
-    // quality: 0.8,
+    quality: 0.8,
   });
   const webpArraybuffer = await webpBlob.arrayBuffer();
   return webpArraybuffer;

@@ -180,7 +180,7 @@ export function pointCloudArrayBufferToGeometry(
   targetWidth = width,
   targetHeight = height,
 ) {
-  const scaleFactor = 1 / width;
+  const scaleFactor = getScaleFactor(width, height);
   
   // const width2 = width / pixelStride;
   // const height2 = height / pixelStride;
@@ -423,7 +423,7 @@ export const getGepthFloatsFromGeometryPositions = geometryPositions => {
 };
 export const getDepthFloatsFromPointCloud = (pointCloudArrayBuffer, width, height) => {
   const geometryPositions = new Float32Array(width * height * 3);
-  const scaleFactor = 1 / width;
+  const scaleFactor = getScaleFactor(width, height);
   pointCloudArrayBufferToPositionAttributeArray(
     pointCloudArrayBuffer,
     width,

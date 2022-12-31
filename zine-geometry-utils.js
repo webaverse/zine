@@ -172,8 +172,7 @@ export function pointCloudArrayBufferToPositionAttributeArrayResized(
   // }
 }
 function getScaleFactor(width, height) {
-  // return 1 / width;
-  return 0.001;
+  return 1 / width;
 }
 export function pointCloudArrayBufferToGeometry(
   arrayBuffer,

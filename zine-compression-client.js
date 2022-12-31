@@ -1,3 +1,4 @@
+import ZineCompressionWorker from './zine-compression-server.js?worker';
 import {
   makeId,
 } from './id-utils.js';
@@ -22,10 +23,11 @@ export class ZineCompressionClient {
   } = {}) {
     this.workers = [];
     for (let i = 0; i < numWorkers; i++) {
-      const u = new URL('./zine-compression-server.js', import.meta.url);
-      const worker = new Worker(u, {
-        // type: 'module',
-      });
+      // const u = new URL('./zine-compression-server.js', import.meta.url);
+      // const worker = new Worker(u, {
+      //   // type: 'module',
+      // });
+      const worker = new ZineCompressionWorker();
       const messageChannel = new MessageChannel();
       
       const readPort = messageChannel.port1;
@@ -38,9 +40,24 @@ export class ZineCompressionClient {
         },
       }, [readPort]);
       worker.port = writePort;
+      
+      writePort.addEventListener('message', e => {
+        const {data} = e;
+        const {id, result, error} = data;
+        const cb = this.cbs.get(id);
+        if (cb !== undefined) {
+          this.cbs.delete(id);
+          cb(error, result);
+        } else {
+          console.warn('zine compression client: no cb for id: ' + id);
+        }
+      });
+      writePort.start();
+      
       this.workers.push(worker);
     }
     this.nextWorkerIndex = 0;
+
     this.cbs = new Map();
   }
   async request(method, args, {transfers} = {}) {
@@ -79,5 +96,11 @@ export class ZineCompressionClient {
       value,
     }, {transfers});
     return result;
+  }
+  destroy() {
+    for (let i = 0; i < this.workers.length; i++) {
+      const worker = this.workers[i];
+      worker.terminate();
+    }
   }
 }

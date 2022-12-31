@@ -15,7 +15,7 @@ const makePromise = () => {
   return promise;
 };
 
-const defaultNumWorkers = 4;
+const defaultNumWorkers = 1;
 
 export class ZineCompressionClient {
   constructor({

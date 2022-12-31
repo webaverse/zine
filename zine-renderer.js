@@ -128,8 +128,12 @@ const reconstructValueMaskFromLabelsIndices = (labels, labelIndices) => {
   const result = new Float32Array(labelIndices.length);
   for (let i = 0; i < labelIndices.length; i++) {
     const labelIndex = labelIndices[i];
-    const label = labels[labelIndex];
-    result[i] = label.value;
+    if (labelIndex !== 255) {
+      const label = labels[labelIndex];
+      result[i] = label.value;
+    } else {
+      result[i] = -1;
+    }
   }
   return result;
 };

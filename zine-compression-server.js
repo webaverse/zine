@@ -23,14 +23,13 @@ export class ZineCompressionServer {
   constructor() {
     (async () => {
       // wait for global init message to get the port
-      let port;
-      await new Promise((accept, reject) => {
+      const port = await new Promise((accept, reject) => {
         self.addEventListener('message', e => {
           const {data} = e;
           const {method, args} = data;
           if (method === 'init') {
-            port = args.port;
-            accept();
+            accept(args.port);
+            args.port.start();
           }
         });
       });

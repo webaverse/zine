@@ -15,6 +15,9 @@ import {
   layer0CompressionSpecs,
   layer1CompressionSpecs,
 } from './zine-data-specs.js';
+import {
+  ZineCompressionClient,
+} from './zine-compression-client.js';
 
 //
 
@@ -46,22 +49,28 @@ export class ZineStoryboardCompressor {
             }
             const value = layer.getData(key);
             if (value !== undefined) {
-              let compressedValue;
-              if (type === 'image') {
-                compressedValue = await compressImage(value);
-              } else if (type === 'pointCloud') {
-                compressedValue = await compressPointCloud(new Float32Array(value));
-              } else if (type === 'depthQuantized') {
-                compressedValue = await compressDepthQuantized(new Float32Array(value, maxDepth));
-              } else if (type === 'depth') {
-                compressedValue = await compressDepth(new Float32Array(value), quantization);
-              } else if (type === 'byteAttribute') {
-                compressedValue = await compressByteAttribute(value);
-              } else if (type === 'generic') {
-                compressedValue = await compressGeneric(value);
-              } else {
-                throw new Error('unknown compression type: ' + type);
-              }
+              const compressedValue = await this.client.compress({
+                type,
+                value,
+              });
+              
+              // let compressedValue;
+              // if (type === 'image') {
+              //   compressedValue = await compressImage(value);
+              // } else if (type === 'pointCloud') {
+              //   compressedValue = await compressPointCloud(new Float32Array(value));
+              // } else if (type === 'depthQuantized') {
+              //   compressedValue = await compressDepthQuantized(new Float32Array(value, maxDepth));
+              // } else if (type === 'depth') {
+              //   compressedValue = await compressDepth(new Float32Array(value), quantization);
+              // } else if (type === 'byteAttribute') {
+              //   compressedValue = await compressByteAttribute(value);
+              // } else if (type === 'generic') {
+              //   compressedValue = await compressGeneric(value);
+              // } else {
+              //   throw new Error('unknown compression type: ' + type);
+              // }
+
               // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
               layer.setData(key, compressedValue);
             } else {
@@ -94,25 +103,27 @@ export class ZineStoryboardCompressor {
           }
           const value = layer1.getData(key);
           if (value !== undefined) {
-            // console.log('had decompressible data', key, type, value);
-            let decompressedValue;
-            if (type === 'pointCloud') {
-              decompressedValue = await decompressPointCloud(value);
-              // if (decompressedValue.byteOffset !== 0) {
-              //   throw new Error('unexpected byteOffset');
-              // }
-              decompressedValue = decompressedValue.buffer;
-            } else if (type === 'depthQuantized') {
-              decompressedValue = await decompressDepthQuantized(value);
-            } else if (type === 'depth') {
-              decompressedValue = await decompressDepth(value);
-            } else if (type === 'byteAttribute') {
-              decompressedValue = await decompressByteAttribute(value);
-            } else if (type === 'generic') {
-              decompressedValue = await decompressGeneric(value);
-            } else {
-              throw new Error('unknown compression type: ' + type);
-            }
+            const decompressedValue = await this.client.decompress({
+              type,
+              value,
+            });
+
+            // let decompressedValue;
+            // if (type === 'pointCloud') {
+            //   decompressedValue = await decompressPointCloud(value);
+            //   decompressedValue = decompressedValue.buffer;
+            // } else if (type === 'depthQuantized') {
+            //   decompressedValue = await decompressDepthQuantized(value);
+            // } else if (type === 'depth') {
+            //   decompressedValue = await decompressDepth(value);
+            // } else if (type === 'byteAttribute') {
+            //   decompressedValue = await decompressByteAttribute(value);
+            // } else if (type === 'generic') {
+            //   decompressedValue = await decompressGeneric(value);
+            // } else {
+            //   throw new Error('unknown compression type: ' + type);
+            // }
+
             // console.log('decompressed', key, type, value, decompressedValue);
             layer1.setData(key, decompressedValue);
           } else {

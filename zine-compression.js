@@ -1,16 +1,16 @@
-import {
-  compressImage,
-  compressPointCloud,
-  decompressPointCloud,
-  compressDepth,
-  compressDepthQuantized,
-  decompressDepth,
-  decompressDepthQuantized,
-  compressByteAttribute,
-  decompressByteAttribute,
-  compressGeneric,
-  decompressGeneric,
-} from './zine-compression-utils.js';
+// import {
+//   compressImage,
+//   compressPointCloud,
+//   decompressPointCloud,
+//   compressDepth,
+//   compressDepthQuantized,
+//   decompressDepth,
+//   decompressDepthQuantized,
+//   compressByteAttribute,
+//   decompressByteAttribute,
+//   compressGeneric,
+//   decompressGeneric,
+// } from './zine-compression-utils.js';
 import {
   layer0CompressionSpecs,
   layer1CompressionSpecs,
@@ -21,8 +21,8 @@ import {
 
 //
 
-const maxDepth = 10000;
-const quantization = 16;
+// const maxDepth = 10000;
+// const quantization = 16;
 const layersCompressionSpecs = [
   layer0CompressionSpecs,
   layer1CompressionSpecs,
@@ -31,6 +31,9 @@ const layersCompressionSpecs = [
 //
 
 export class ZineStoryboardCompressor {
+  constructor() {
+    this.client = new ZineCompressionClient();
+  }
   async compress(storyboard, {
     keys,
   } = {}) {
@@ -49,10 +52,7 @@ export class ZineStoryboardCompressor {
             }
             const value = layer.getData(key);
             if (value !== undefined) {
-              const compressedValue = await this.client.compress({
-                type,
-                value,
-              });
+              const compressedValue = await this.client.compress(type, value);
               
               // let compressedValue;
               // if (type === 'image') {
@@ -71,7 +71,6 @@ export class ZineStoryboardCompressor {
               //   throw new Error('unknown compression type: ' + type);
               // }
 
-              // console.log(`compression ratio: ${key} ${type} ${(compressedValue.byteLength / value.byteLength * 100).toFixed(2)}%`);
               layer.setData(key, compressedValue);
             } else {
               console.warn('value was undefined', key, type, value, new Error().stack);
@@ -80,6 +79,9 @@ export class ZineStoryboardCompressor {
           }
         }
       }
+
+      const layer0 = layers[0];
+      layer0.setData('compressed', true);
     }
   }
   async decompress(storyboard, {
@@ -95,7 +97,6 @@ export class ZineStoryboardCompressor {
           const compressionSpec = layer1CompressionSpecs[j];
 
           const {key, type} = compressionSpec;
-          // console.log('decompressing', {key, type});
           if (keys) {
             if (!keys.includes(key)) {
               continue;
@@ -103,10 +104,7 @@ export class ZineStoryboardCompressor {
           }
           const value = layer1.getData(key);
           if (value !== undefined) {
-            const decompressedValue = await this.client.decompress({
-              type,
-              value,
-            });
+            const decompressedValue = await this.client.decompress(type, value);
 
             // let decompressedValue;
             // if (type === 'pointCloud') {
@@ -132,6 +130,12 @@ export class ZineStoryboardCompressor {
           }
         }
       }
+
+      const layer0 = layers[0];
+      layer0.setData('compressed', false);
     }
+  }
+  destroy() {
+    this.client.destroy();
   }
 }

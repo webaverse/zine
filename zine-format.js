@@ -148,6 +148,16 @@ const getCompressor = (() => {
     return compressor;
   };
 })();
+export function initCompressor({
+  numWorkers,
+} = {}) {
+  if (compressor) {
+    destroyCompressor();
+  }
+  compressor = new ZineStoryboardCompressor({
+    numWorkers,
+  });
+}
 export function destroyCompressor() {
   if (compressor) {
     compressor.destroy();
@@ -267,7 +277,7 @@ export class ZineStoryboard extends EventTarget {
     const compressor = getCompressor();
 
     const zineStoryboardClone = this.clone();
-    
+
     await compressor.compress(zineStoryboardClone, {
       keys: decompressKeys,
     });

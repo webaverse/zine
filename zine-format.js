@@ -139,6 +139,22 @@ function keyPathEquals(a, b) {
   return result;
 }; */
 
+let compressor = null;
+const getCompressor = (() => {
+  return () => {
+    if (!compressor) {
+      compressor = new ZineStoryboardCompressor();
+    }
+    return compressor;
+  };
+})();
+export function destroyCompressor() {
+  if (compressor) {
+    compressor.destroy();
+    compressor = null;
+  }
+};
+
 export class ZineStoryboard extends EventTarget {
   constructor() {
     super();
@@ -230,8 +246,9 @@ export class ZineStoryboard extends EventTarget {
   async loadAsync(uint8Array, {
     decompressKeys,
   } = {}) {
+    const compressor = getCompressor();
+
     this.#loadUncompressed(uint8Array);
-    const compressor = new ZineStoryboardCompressor();
 
     // // XXX debugging
     // const keySizes = measureKeys(this.zd.data);
@@ -247,8 +264,10 @@ export class ZineStoryboard extends EventTarget {
   async exportAsync({
     decompressKeys,
   } = {}) {
+    const compressor = getCompressor();
+
     const zineStoryboardClone = this.clone();
-    const compressor = new ZineStoryboardCompressor();
+    
     await compressor.compress(zineStoryboardClone, {
       keys: decompressKeys,
     });

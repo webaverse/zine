@@ -86,7 +86,8 @@ export class ZineCompressionServer {
               break;
             }
             case 'decompress': {
-              // console.log('had decompressible data', key, type, value);
+              const {type, value} = args;
+
               let decompressedValue;
               let transfers = [];
               if (type === 'pointCloud') {

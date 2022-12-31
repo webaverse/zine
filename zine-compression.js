@@ -28,7 +28,9 @@ const layersCompressionSpecs = [
 //
 
 export class ZineStoryboardCompressor {
-  async compress(storyboard) {
+  async compress(storyboard, {
+    keys,
+  } = {}) {
     const panels = storyboard.getPanels();
     for (const panel of panels) {
       const layers = panel.getLayers();
@@ -37,6 +39,11 @@ export class ZineStoryboardCompressor {
         const compressionSpecs = layersCompressionSpecs[i];
         if (compressionSpecs) {
           for (const {key, type} of compressionSpecs) {
+            if (keys) {
+              if (!keys.includes(key)) {
+                continue;
+              }
+            }
             const value = layer.getData(key);
             if (value !== undefined) {
               let compressedValue;
@@ -66,7 +73,9 @@ export class ZineStoryboardCompressor {
       }
     }
   }
-  async decompress(storyboard) {
+  async decompress(storyboard, {
+    keys,
+  } = {}) {
     const panels = storyboard.getPanels();
     for (let i = 0; i < panels.length; i++) {
       const panel = panels[i];
@@ -78,6 +87,11 @@ export class ZineStoryboardCompressor {
 
           const {key, type} = compressionSpec;
           // console.log('decompressing', {key, type});
+          if (keys) {
+            if (!keys.includes(key)) {
+              continue;
+            }
+          }
           const value = layer1.getData(key);
           if (value !== undefined) {
             // console.log('had decompressible data', key, type, value);

@@ -10,15 +10,16 @@ export const compressImage = async imageArrayBuffer => {
     imageArrayBuffer,
   ]);
   const imageBitmap = await createImageBitmap(blob);
-  const canvas = document.createElement('canvas');
-  canvas.width = imageBitmap.width;
-  canvas.height = imageBitmap.height;
+  
+  const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+
   const context = canvas.getContext('2d');
   context.drawImage(imageBitmap, 0, 0);
   imageBitmap.close();
   // encode as webp
-  const webpBlob = await new Promise((accept, reject) => {
-    canvas.toBlob(accept, 'image/webp'/*, 0.8*/);
+  const webpBlob = await canvas.convertToBlob({
+    type: 'image/webp',
+    // quality: 0.8,
   });
   const webpArraybuffer = await webpBlob.arrayBuffer();
   return webpArraybuffer;

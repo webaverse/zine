@@ -7,6 +7,7 @@ import {colors, rainbowColors, detectronColors} from './zine-colors.js';
 //
 
 const localVector = new THREE.Vector3();
+const localBox = new THREE.Box3();
 const localColor = new THREE.Color();
 
 //
@@ -204,6 +205,26 @@ export function pointCloudArrayBufferToGeometry(
     geometry.attributes.position.array,
   );
   return geometry;
+}
+
+//
+
+export function getBoundingBoxFromPointCloud(pointCloudArrayBuffer, width, height) {
+  const pointCloudFloat32Array = new Float32Array(pointCloudArrayBuffer);
+  const scaleFactor = getScaleFactor(width, height);
+  localBox.min.setScalar(0);
+  localBox.max.setScalar(0);
+  for (let i = 0; i < pointCloudFloat32Array.length; i += 3) {
+    localVector.fromArray(pointCloudFloat32Array, i);
+    localVector.x *= scaleFactor;
+    localVector.y *= -scaleFactor;
+    localVector.z *= -scaleFactor;
+    localBox.expandByPoint(localVector);
+  }
+  return {
+    min: localBox.min.toArray(),
+    max: localBox.max.toArray(),
+  };
 }
 
 //

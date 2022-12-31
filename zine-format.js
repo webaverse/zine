@@ -227,7 +227,9 @@ export class ZineStoryboard extends EventTarget {
   clear() {
     this.zd.clear();
   }
-  async loadAsync(uint8Array) {
+  async loadAsync(uint8Array, {
+    decompressKeys,
+  } = {}) {
     this.#loadUncompressed(uint8Array);
     const compressor = new ZineStoryboardCompressor();
 
@@ -235,15 +237,21 @@ export class ZineStoryboard extends EventTarget {
     // const keySizes = measureKeys(this.zd.data);
     // console.log('got key sizes', keySizes, this.zd.data);
 
-    await compressor.decompress(this);
+    await compressor.decompress(this, {
+      keys: decompressKeys,
+    });
   }
   #loadUncompressed(uint8Array) {
     this.zd.load(uint8Array);
   }
-  async exportAsync() {
+  async exportAsync({
+    decompressKeys,
+  } = {}) {
     const zineStoryboardClone = this.clone();
     const compressor = new ZineStoryboardCompressor();
-    await compressor.compress(zineStoryboardClone);
+    await compressor.compress(zineStoryboardClone, {
+      keys: decompressKeys,
+    });
     return zineStoryboardClone.#exportUncompressed();
   }
   #exportUncompressed() {

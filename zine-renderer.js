@@ -615,7 +615,7 @@ export class ZineRenderer extends EventTarget {
 
     // scale scene
     const transformScene = new THREE.Object3D();
-    // transformScene.autoUpdate = false;
+    transformScene.autoUpdate = false;
     transformScene.position.fromArray(position);
     transformScene.quaternion.fromArray(quaternion);
     transformScene.scale.fromArray(scale);

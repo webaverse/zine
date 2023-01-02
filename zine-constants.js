@@ -14,4 +14,4 @@ export const entranceExitHeight = 2;
 export const entranceExitWidth = 1.5;
 export const entranceExitDepth = 3; // backward depth of an exit
 
-export const entranceExitEmptyDiameter = 0.3;
+export const entranceExitEmptyDiameter = portalExtrusion / 2;

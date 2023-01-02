@@ -209,7 +209,7 @@ export function pointCloudArrayBufferToGeometry(
 
 //
 
-export function getBoundingBoxFromPointCloud(pointCloudArrayBuffer, width, height) {
+export function getBoundingBoxFromPointCloud(pointCloudArrayBuffer, width, height, matrixWorld = null) {
   const pointCloudFloat32Array = new Float32Array(pointCloudArrayBuffer);
   const scaleFactor = getScaleFactor(width, height);
   localBox.min.setScalar(0);
@@ -219,6 +219,9 @@ export function getBoundingBoxFromPointCloud(pointCloudArrayBuffer, width, heigh
     localVector.x *= scaleFactor;
     localVector.y *= -scaleFactor;
     localVector.z *= -scaleFactor;
+    if (matrixWorld) {
+      localVector.applyMatrix4(matrixWorld);
+    }
     localBox.expandByPoint(localVector);
   }
   return {

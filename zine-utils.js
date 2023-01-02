@@ -140,10 +140,8 @@ export const normalToQuaternion = (() => {
   };
 })();
 
+//
 
-/**
- * Ensure a value is within a range.
- */
 export function range(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }

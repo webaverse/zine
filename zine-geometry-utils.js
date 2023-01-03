@@ -43,6 +43,74 @@ export function bilinearInterpolate(
     values[index3] * fx * fz
   );
 }
+export function bilinearInterpolateChecked(
+  values,
+  width,
+  height,
+  px,
+  pz,
+  checkFn,
+) {
+  // first, compute the sample coordinates:
+  const x = Math.floor(px * width);
+  const z = Math.floor(pz * height);
+  const x1 = Math.min(x + 1, width - 1);
+  const z1 = Math.min(z + 1, height - 1);
+  const index = z * width + x;
+  const index1 = z * width + x1;
+  const index2 = z1 * width + x;
+  const index3 = z1 * width + x1;
+  
+  // then, compute the interpolation coefficients:
+  const fx = px * width - x;
+  const fz = pz * height - z;
+  const fx1 = 1 - fx;
+  const fz1 = 1 - fz;
+
+  // sample
+  let a = values[index];
+  let b = values[index1];
+  let c = values[index2];
+  let d = values[index3];
+
+  // check validity
+  const aValid = checkFn(a);
+  const bValid = checkFn(b);
+  const cValid = checkFn(c);
+  const dValid = checkFn(d);
+  const validPoints = [
+    aValid ? a : null,
+    bValid ? b : null,
+    cValid ? c : null,
+    dValid ? d : null,
+  ].filter(v => v !== null);
+  if (validPoints.length > 0) {
+    const sum = validPoints.reduce((a, b) => a + b, 0);
+    const avgValid = sum / validPoints.length;
+    if (!aValid) {
+      a = avgValid;
+    }
+    if (!bValid) {
+      b = avgValid;6
+    }
+    if (!cValid) {
+      c = avgValid;
+    }
+    if (!dValid) {
+      d = avgValid;
+    }
+
+    // interpolate
+    return (
+      a * fx1 * fz1 +
+      b * fx * fz1 +
+      c * fx1 * fz +
+      d * fx * fz
+    );
+  } else {
+    return null;
+  }
+}
 export const bilinearInterpolate3 = (() => {
   const localVector = new THREE.Vector3();
   const localVector2 = new THREE.Vector3();

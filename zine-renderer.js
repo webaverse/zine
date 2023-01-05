@@ -601,6 +601,7 @@ export class ZineRenderer extends EventTarget {
     const predictedHeight = layer1.getData('predictedHeight');
     const edgeDepths = layer1.getData('edgeDepths');
     const wallPlanes = layer1.getData('wallPlanes');
+    const outlineJson = layer1.getData('outlineJson');
     const paths = layer1.getData('paths');
 
     const [
@@ -745,6 +746,7 @@ export class ZineRenderer extends EventTarget {
       portalLocations,
       candidateLocations,
       edgeDepths,
+      outlineJson,
       paths,
     };
 

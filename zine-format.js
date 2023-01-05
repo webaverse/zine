@@ -318,6 +318,11 @@ export class ZineStoryboard extends EventTarget {
     }
   }
 
+  mergeUint8Array(uint8Array) {
+    const zdData = zbdecode(uint8Array);
+    this.zd.data.push(...zdData);
+  }
+
   destroy() {
     this.#unlisten();
   }

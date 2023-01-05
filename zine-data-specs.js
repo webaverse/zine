@@ -19,6 +19,7 @@ export const layer1Specs = [
   'cameraJson',
   'boundingBox',
   'floorBoundingBox',
+  'outlineJson',
   'depthFieldHeaders',
   'depthField',
   'planesJson',

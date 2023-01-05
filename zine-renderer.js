@@ -547,13 +547,13 @@ class WallPlaneMesh extends THREE.Mesh {
       color,
     } = wallPlane;
     
-    const geometry = new THREE.PlaneGeometry(1, 1)
-      .rotateY(Math.PI / 2); // to match physx convention
+    const geometry = new THREE.PlaneGeometry(2, 2)
+      .rotateY(Math.PI / 2); // match physx convention
     const material = new THREE.MeshPhongMaterial({
       color,
       transparent: true,
       opacity: 0.3,
-      // side: THREE.DoubleSide,
+      side: THREE.DoubleSide,
     });
     super(geometry, material);
     this.frustumCulled = false;

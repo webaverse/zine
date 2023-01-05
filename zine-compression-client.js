@@ -56,16 +56,29 @@ export class ZineCompressionClient {
       
       this.workers.push(worker);
     }
-    this.nextWorkerIndex = 0;
 
     this.cbs = new Map();
 
-    this.semaphoreValue = this.workers.length;
+    this.availableWorkers = this.workers.slice();
     this.queue = [];
+    this.waitPromises = [];
+  }
+  async waitForAvailableWorker() {
+    if (this.availableWorkers.length > 0) {
+      // nothing
+    } else {
+      return new Promise((accept, reject) => {
+        this.waitPromises.push({
+          accept,
+          reject,
+        });
+      });
+    }
   }
   async request(method, args, {transfers} = {}) {
-    if (this.semaphoreValue > 0) {
-      this.semaphoreValue--;
+    if (this.availableWorkers.length > 0) {
+      const worker = this.availableWorkers.shift();
+      
       try {
         const id = makeId();
         
@@ -77,24 +90,27 @@ export class ZineCompressionClient {
             promise.reject(error);
           }
         });
-        
-        const worker = this.workers[this.nextWorkerIndex];
+         
         worker.port.postMessage({
           id,
           method,
           args,
         }, transfers);
-        this.nextWorkerIndex = (this.nextWorkerIndex + 1) % this.workers.length;
 
         const result = await promise;
         return result;
       } finally {
-        this.semaphoreValue++;
+        this.availableWorkers.push(worker);
 
         if (this.queue.length > 0) {
           const {method, args, transfers, accept, reject} = this.queue.shift();
           this.request(method, args, {transfers})
             .then(accept, reject);
+        } else {
+          while (this.waitPromises.length > 0) {
+            const {accept} = this.waiters.shift();
+            accept();
+          }
         }
       }
     } else {

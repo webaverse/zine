@@ -624,7 +624,7 @@ export class ZineRenderer extends EventTarget {
     this.scene.add(transformScene);
     this.transformScene = transformScene;
 
-    // render edge depths
+    // edge depths
     const edgeDepthMesh = new EdgeDepthMesh({
       edgeDepths,
       width,
@@ -634,7 +634,7 @@ export class ZineRenderer extends EventTarget {
     edgeDepthMesh.updateMatrixWorld();
     this.edgeDepthMesh = edgeDepthMesh;
 
-    // render wall plane meshes
+    // wall plane meshes
     this.wallPlaneMeshes = [];
     for (let i = 0; i < wallPlanes.length; i++) {
       const wallPlane = wallPlanes[i];
@@ -719,7 +719,8 @@ export class ZineRenderer extends EventTarget {
     });
     this.transformScene.add(floorNetMesh);
     this.floorNetMesh = floorNetMesh;
-    
+
+    // align to floor
     if (alignFloor) {
       const floorInverseQuaternion = localQuaternion
         .fromArray(floorPlaneLocation.quaternion)

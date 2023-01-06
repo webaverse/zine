@@ -165,16 +165,72 @@ export function destroyCompressor() {
   }
 };
 
-export class ZineStoryboard extends EventTarget {
+export class ZineStoryboardBase extends EventTarget {
   constructor() {
     super();
 
     this.zd = new ZineData();
+  }
+  prefix = [];
 
+  getKeys() {
+    return this.zd.getKeys(this.prefix);
+  }
+  
+  clone() {
+    const result = new this.constructor();
+    result.loadUncompressed(this.exportUncompressed());
+    return result;
+  }
+  clear() {
+    this.zd.clear();
+  }
+  async loadAsync(uint8Array, {
+    decompressKeys,
+  } = {}) {
+    const compressor = getCompressor();
+
+    this.loadUncompressed(uint8Array);
+
+    // // XXX debugging
+    // const keySizes = measureKeys(this.zd.data);
+    // console.log('got key sizes', keySizes, this.zd.data);
+
+    await compressor.decompress(this, {
+      keys: decompressKeys,
+    });
+  }
+  loadUncompressed(uint8Array) {
+    this.zd.load(uint8Array);
+  }
+  async exportAsync({
+    decompressKeys,
+  } = {}) {
+    const compressor = getCompressor();
+
+    const zineStoryboardClone = this.clone();
+
+    await compressor.compress(zineStoryboardClone, {
+      keys: decompressKeys,
+    });
+    return zineStoryboardClone.exportUncompressed();
+  }
+  exportUncompressed() {
+    return this.zd.toUint8Array();
+  }
+
+  mergeUint8Array(uint8Array) {
+    const zdData = zbdecode(uint8Array);
+    this.zd.data.push(...zdData);
+  }
+}
+
+export class ZineStoryboard extends ZineStoryboardBase {
+  constructor() {
+    super();
     this.#init();
     this.#listen();
   }
-  prefix = [];
   #panels = [];
   #unlisten;
   #init() {
@@ -241,52 +297,6 @@ export class ZineStoryboard extends EventTarget {
     };
   }
 
-  getKeys() {
-    return this.zd.getKeys(this.prefix);
-  }
-  
-  clone() {
-    const result = new ZineStoryboard();
-    result.#loadUncompressed(this.#exportUncompressed());
-    return result;
-  }
-  clear() {
-    this.zd.clear();
-  }
-  async loadAsync(uint8Array, {
-    decompressKeys,
-  } = {}) {
-    const compressor = getCompressor();
-
-    this.#loadUncompressed(uint8Array);
-
-    // // XXX debugging
-    // const keySizes = measureKeys(this.zd.data);
-    // console.log('got key sizes', keySizes, this.zd.data);
-
-    await compressor.decompress(this, {
-      keys: decompressKeys,
-    });
-  }
-  #loadUncompressed(uint8Array) {
-    this.zd.load(uint8Array);
-  }
-  async exportAsync({
-    decompressKeys,
-  } = {}) {
-    const compressor = getCompressor();
-
-    const zineStoryboardClone = this.clone();
-
-    await compressor.compress(zineStoryboardClone, {
-      keys: decompressKeys,
-    });
-    return zineStoryboardClone.#exportUncompressed();
-  }
-  #exportUncompressed() {
-    return this.zd.toUint8Array();
-  }
-
   getPanels() {
     return this.#panels;
   }
@@ -316,11 +326,6 @@ export class ZineStoryboard extends EventTarget {
     } else {
       throw new Error('panel not found');
     }
-  }
-
-  mergeUint8Array(uint8Array) {
-    const zdData = zbdecode(uint8Array);
-    this.zd.data.push(...zdData);
   }
 
   destroy() {

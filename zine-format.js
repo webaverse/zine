@@ -605,11 +605,12 @@ export class ZineData extends EventTarget {
     return this.getData(key) !== undefined;
   }
   getKeys(key) {
-    const parent = this.getData(key);
-    if (parent) {
-      return parent.map(([key]) => key);
+    let parentData;
+    if (key) {
+      parentData = this.getData(key);
     } else {
-      return [];
+      parentData = this.data;
     }
+    return parentData.map(([key]) => key);
   }
 }

@@ -11,11 +11,11 @@ import {
 import {
   ZineStoryboardCompressor,
 } from './zine-compression.js';
+import {
+  zineMagicBytes,
+} from './zine-constants.js';
 
-//
-
-export const zineMagicBytes = 'ZINE';
-
+export {zineMagicBytes};
 //
 
 // o is structured like:

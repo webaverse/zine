@@ -1,3 +1,5 @@
+export const zineMagicBytes = 'ZINE';
+
 export const panelSize = 1024;
 
 export const floorNetWorldSize = 100;

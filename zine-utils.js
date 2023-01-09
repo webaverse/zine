@@ -3,6 +3,7 @@ import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {
+  defaultCameraFov,
   floorNetWorldSize,
   floorNetWorldDepth,
 } from './zine-constants.js';
@@ -58,7 +59,7 @@ export const makeGltfExporter = () => {
 
 //
 
-export const makeDefaultCamera = () => new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+export const makeDefaultCamera = () => new THREE.PerspectiveCamera(defaultCameraFov, 1, 0.1, 1000);
 export const makeFloorNetCamera = () => {
   const floorNetCamera = new THREE.OrthographicCamera(
     -floorNetWorldSize / 2,

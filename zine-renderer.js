@@ -868,6 +868,7 @@ export class ZineRenderer extends EventTarget {
       sphericalHarmonics,
     });
     lightMesh.position.y = 3;
+    lightMesh.visible = false;
     this.transformScene.add(lightMesh);
     lightMesh.updateMatrixWorld();
     this.lightMesh = lightMesh;

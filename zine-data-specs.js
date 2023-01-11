@@ -22,6 +22,7 @@ export const layer1Specs = [
   'outlineJson',
   'depthFieldHeaders',
   'depthField',
+  'sphericalHarmonics',
   'planesJson',
   'portalJson',
   'segmentLabels',

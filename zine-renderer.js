@@ -722,6 +722,7 @@ export class ZineRenderer extends EventTarget {
     const scale = layer1.getData('scale');
     const depthFieldHeaders = layer1.getData('depthFieldHeaders');
     const depthFieldArrayBuffer = layer1.getData('depthField');
+    const sphericalHarmonics = layer1.getData('sphericalHarmonics');
     const planesJson = layer1.getData('planesJson');
     const portalJson = layer1.getData('portalJson');
     const segmentLabels = layer1.getData('segmentLabels');
@@ -861,6 +862,15 @@ export class ZineRenderer extends EventTarget {
     });
     this.transformScene.add(floorNetMesh);
     this.floorNetMesh = floorNetMesh;
+
+    // light mesh
+    const lightMesh = new LightMesh({
+      sphericalHarmonics,
+    });
+    lightMesh.position.y = 3;
+    this.transformScene.add(lightMesh);
+    lightMesh.updateMatrixWorld();
+    this.lightMesh = lightMesh;
 
     // align to floor
     if (alignFloor) {

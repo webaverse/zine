@@ -568,28 +568,6 @@ class LightMesh extends THREE.Mesh {
   constructor({
     sphericalHarmonics: sh,
   }) {
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef0_r, this.cubeMap_sh_coef[0].x, this.cubeMap_sh_coef[1].x, this.cubeMap_sh_coef[2].x);
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef1_r, this.cubeMap_sh_coef[3].x, this.cubeMap_sh_coef[4].x, this.cubeMap_sh_coef[5].x);
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef2_r, this.cubeMap_sh_coef[6].x, this.cubeMap_sh_coef[7].x, this.cubeMap_sh_coef[8].x);
-
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef0_g, this.cubeMap_sh_coef[0].y, this.cubeMap_sh_coef[1].y, this.cubeMap_sh_coef[2].y);
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef1_g, this.cubeMap_sh_coef[3].y, this.cubeMap_sh_coef[4].y, this.cubeMap_sh_coef[5].y);
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef2_g, this.cubeMap_sh_coef[6].y, this.cubeMap_sh_coef[7].y, this.cubeMap_sh_coef[8].y);
-
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef0_b, this.cubeMap_sh_coef[0].z, this.cubeMap_sh_coef[1].z, this.cubeMap_sh_coef[2].z);
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef1_b, this.cubeMap_sh_coef[3].z, this.cubeMap_sh_coef[4].z, this.cubeMap_sh_coef[5].z);
-    // this.gl.uniform3f(shaderProgram.u_light_SHCoef2_b, this.cubeMap_sh_coef[6].z, this.cubeMap_sh_coef[7].z, this.cubeMap_sh_coef[8].z);
-
-    // const u_light_SHCoef0_r = new THREE.Vector3(sh[0], sh[1], sh[2]);
-    // const u_light_SHCoef1_r = new THREE.Vector3(sh[3], sh[4], sh[5]);
-    // const u_light_SHCoef2_r = new THREE.Vector3(sh[6], sh[7], sh[8]);
-    // const u_light_SHCoef0_g = new THREE.Vector3(sh[9], sh[10], sh[11]);
-    // const u_light_SHCoef1_g = new THREE.Vector3(sh[12], sh[13], sh[14]);
-    // const u_light_SHCoef2_g = new THREE.Vector3(sh[15], sh[16], sh[17]);
-    // const u_light_SHCoef0_b = new THREE.Vector3(sh[18], sh[19], sh[20]);
-    // const u_light_SHCoef1_b = new THREE.Vector3(sh[21], sh[22], sh[23]);
-    // const u_light_SHCoef2_b = new THREE.Vector3(sh[24], sh[25], sh[26]);
-
     const sh0_r = new THREE.Vector3(sh[0], sh[1], sh[2]);
     const sh1_r = new THREE.Vector3(sh[3], sh[4], sh[5]);
     const sh2_r = new THREE.Vector3(sh[6], sh[7], sh[8]);
@@ -600,11 +578,6 @@ class LightMesh extends THREE.Mesh {
     const sh1_b = new THREE.Vector3(sh[21], sh[22], sh[23]);
     const sh2_b = new THREE.Vector3(sh[24], sh[25], sh[26]);
 
-    // vec3 lightDirR= normalize(vec3(-sh1_r.x, -sh0_r.y, sh0_r.z));\n\
-    // vec3 lightDirG= normalize(vec3(-sh1_g.x, -sh0_g.y, sh0_g.z));\n\
-    // vec3 lightDirB= normalize(vec3(-sh1_b.x, -sh0_b.y, sh0_b.z));\n\
-    // vec3 lightDir= normalize( 0.3*lightDirR + 0.59*lightDirG + 0.11*lightDirB );\n\
-
     const lightDirR = new THREE.Vector3(-sh1_r.x, -sh0_r.y, sh0_r.z).normalize();
     const lightDirG = new THREE.Vector3(-sh1_g.x, -sh0_g.y, sh0_g.z).normalize();
     const lightDirB = new THREE.Vector3(-sh1_b.x, -sh0_b.y, sh0_b.z).normalize();
@@ -614,22 +587,7 @@ class LightMesh extends THREE.Mesh {
       .add(lightDirB.clone().multiplyScalar(0.11))
       .normalize();
 
-    console.log('light dir', lightDir.toArray());
-
-    // vec3 sh0_light= vec3(0.282094791, -0.488602511*lightDir.y, 0.488602511*lightDir.z);\n\
-    // vec3 sh1_light= vec3(-0.488602511*lightDir.x, 1.092548431*lightDir.y*lightDir.x, -1.092548431*lightDir.y*lightDir.z);\n\
-    // vec3 sh2_light= vec3(0.315391565*(3.0*lightDir.z*lightDir.z-1.0), -1.092548431*lightDir.x*lightDir.z, 0.546274215*(lightDir.x*lightDir.x - lightDir.y*lightDir.y));\n\
-    // /* normalize the light */\n\
-    // sh0_light*= 2.956793086;\n\
-    // sh1_light*= 2.956793086;\n\
-    // sh2_light*= 2.956793086;\n\
-    // float denom= dot(sh0_light, sh0_light)+dot(sh1_light, sh1_light)+dot(sh2_light, sh2_light);\n\
-    // vec3 lightColor= vec3(\n\
-    //     dot(sh0_r, sh0_light)+dot(sh1_r, sh1_light)+dot(sh2_r, sh2_light),\n\
-    //     dot(sh0_g, sh0_light)+dot(sh1_g, sh1_light)+dot(sh2_g, sh2_light),\n\
-    //     dot(sh0_b, sh0_light)+dot(sh1_b, sh1_light)+dot(sh2_b, sh2_light)\n\
-    // );\n\
-    // lightColor/=denom;\n\
+    // console.log('light dir', lightDir.toArray());
 
     const sh0_light = new THREE.Vector3(0.282094791, -0.488602511 * lightDir.y, 0.488602511 * lightDir.z);
     const sh1_light = new THREE.Vector3(-0.488602511 * lightDir.x, 1.092548431 * lightDir.y * lightDir.x, -1.092548431 * lightDir.y * lightDir.z);
@@ -647,7 +605,7 @@ class LightMesh extends THREE.Mesh {
     lightColor.y = Math.min(Math.max(lightColor.y, 0), 1);
     lightColor.z = Math.min(Math.max(lightColor.z, 0), 1);
 
-    console.log('light color', lightColor.toArray());
+    // console.log('light color', lightColor.toArray());
 
     // XXX add outline geometry
     // geometry

@@ -568,6 +568,11 @@ class LightMesh extends THREE.Mesh {
   constructor({
     sphericalHarmonics: sh,
   }) {
+    const _addMonocolor = (geometry, v) => {
+      const monocolor = new Float32Array(geometry.attributes.position.array.length / 3).fill(v);
+      geometry.setAttribute('monocolor', new THREE.BufferAttribute(monocolor, 1));
+    };
+
     const sh0_r = new THREE.Vector3(sh[0], sh[1], sh[2]);
     const sh1_r = new THREE.Vector3(sh[3], sh[4], sh[5]);
     const sh2_r = new THREE.Vector3(sh[6], sh[7], sh[8]);
@@ -607,43 +612,104 @@ class LightMesh extends THREE.Mesh {
 
     // console.log('light color', lightColor.toArray());
 
-    // XXX add outline geometry
     // geometry
     const width = 0.02;
     const length = 0.1;
     const size = 0.2;
-    const planeGeometryFront = new THREE.PlaneGeometry(size, size);
-    const planeGeometryBack = planeGeometryFront.clone()
-      .rotateY(Math.PI);
-    const rodGeometry = new THREE.BoxGeometry(width, width, length)
-      .translate(0, 0, -length * 0.5);
-    const geometries = [
-      planeGeometryFront,
-      planeGeometryBack,
-    ].concat(
-      [
-        [-1, -1],
-        [-1, 1],
-        [1, -1],
-        [1, 1],
-      ].map(([dx, dy]) =>
-        rodGeometry.clone()
-          .translate(
-            dx * size * 0.5 - dx * width * 0.5,
-            dy * size * 0.5 - dy * width * 0.5,
-            0
-          )
-      )
-    );
-    const geometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+    const planeGeometryFront = new THREE.BoxGeometry(size, size, width)
+    const rodGeometryFront = new THREE.BoxGeometry(width, width, length);
+    const _makeGeometry = ({
+      planeGeometry,
+      rodGeometry,
+      scale,
+    }) => {
+      const frontGeometries = [
+        planeGeometry.clone()
+          .scale(scale, scale, scale),
+      ].concat(
+        [
+          [-1, -1],
+          [-1, 1],
+          [1, -1],
+          [1, 1],
+        ].map(([dx, dy]) =>
+          rodGeometry.clone()
+            .scale(scale, scale, scale)
+            .translate(0, 0, (-length * 0.5 - width * 0.5) * scale)
+            .translate(
+              (dx * size * 0.5 - dx * width * 0.5),
+              (dy * size * 0.5 - dy * width * 0.5),
+              0
+            )
+        )
+      );
+      const geometry = BufferGeometryUtils.mergeBufferGeometries(frontGeometries);
+      return geometry;
+    };
+    const frontGeometry = _makeGeometry({
+      planeGeometry: planeGeometryFront,
+      rodGeometry: rodGeometryFront,
+      scale: 1,
+    });
+    _addMonocolor(frontGeometry, 0);
+
+    const invertGeometry = g => {
+      return g.clone()
+        .scale(-1, -1, -1)
+        // .scale(1.5, 1.5, 1.5);
+    };
+    const backGeometry = _makeGeometry({
+      planeGeometry: invertGeometry(planeGeometryFront),
+      rodGeometry: invertGeometry(rodGeometryFront),
+      scale: 1.3,
+    });
+    _addMonocolor(backGeometry, 1);
+
+    // merge
+    const geometry = BufferGeometryUtils.mergeBufferGeometries([
+      frontGeometry,
+      backGeometry,
+    ]);
 
     // material
-    const material = new THREE.MeshPhongMaterial({
-      color: new THREE.Color(
-        lightColor.x,
-        lightColor.y,
-        lightColor.z,
-      ),
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: {
+          value: lightColor,
+          needsUpdate: true,
+        }
+      },
+      vertexShader: `\
+        attribute float y;
+        attribute vec3 direction;
+        attribute float monocolor;
+        varying float vY;
+        varying float vMonocolor;
+
+        void main() {
+          vY = uv.y;
+          vMonocolor = monocolor;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `\
+        uniform vec3 uColor;
+        varying float vY;
+        varying float vMonocolor;
+
+        void main() {
+          gl_FragColor = vec4(uColor, 1.);
+          gl_FragColor.rgb += vY * 0.15;
+          gl_FragColor.rgb += vMonocolor;
+
+          if (vMonocolor > 0.5) {
+            gl_FragColor.a = 0.5;
+          } else {
+            gl_FragColor.a = 1.;
+          }
+        }
+      `,
+      transparent: true,
     });
 
     super(geometry, material);
@@ -651,8 +717,8 @@ class LightMesh extends THREE.Mesh {
     this.quaternion.setFromRotationMatrix(
       new THREE.Matrix4().lookAt(
         new THREE.Vector3(),
-        lightDir.clone()
-          .negate(),
+        lightDir.clone(),
+          // .negate(),
         upVector
       )
     );

@@ -797,6 +797,7 @@ export class ZineRenderer extends EventTarget {
       width,
       height,
     });
+    edgeDepthMesh.visible = false;
     this.transformScene.add(edgeDepthMesh);
     edgeDepthMesh.updateMatrixWorld();
     this.edgeDepthMesh = edgeDepthMesh;

@@ -36,7 +36,7 @@ export const makeRenderer = canvas => {
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setClearColor(0x000000, 0);
+  renderer.setClearColor(0xFFFFFF, 1);
   return renderer;
 };
 

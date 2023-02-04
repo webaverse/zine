@@ -106,11 +106,11 @@ export class ZineCompressionClient {
           const {method, args, transfers, accept, reject} = this.queue.shift();
           this.request(method, args, {transfers})
             .then(accept, reject);
-        } else {
-          while (this.waitPromises.length > 0) {
-            const {accept} = this.waiters.shift();
-            accept();
-          }
+        // } else {
+        //   while (this.waitPromises.length > 0) {
+        //     const {accept} = this.queue.shift();
+        //     accept();
+        //   }
         }
       }
     } else {

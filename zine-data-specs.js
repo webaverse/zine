@@ -14,6 +14,7 @@ export const layer0Specs = [
 //
 
 export const layer1Specs = [
+  'lore',
   'resolution',
   'position',
   'quaternion',

@@ -110,3 +110,11 @@ export const layer2Specs = [
   'segmentMask',
   'editCameraJson',
 ];
+
+//
+
+export const layerSpecs = [
+  layer0Specs,
+  layer1Specs,
+  layer2Specs,
+];

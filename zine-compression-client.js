@@ -1,19 +1,10 @@
-import ZineCompressionWorker from './zine-compression-server.js?worker';
+// import ZineCompressionWorker from './zine-compression-server.js?worker';
 import {
   makeId,
 } from './id-utils.js';
-// import {makePromise} from './utils.js';
-
-const makePromise = () => {
-  let accept, reject;
-  const promise = new Promise((a, r) => {
-    accept = a;
-    reject = r;
-  });
-  promise.accept = accept;
-  promise.reject = reject;
-  return promise;
-};
+import {
+  makePromise,
+} from './zine-utils.js';
 
 const defaultNumWorkers = 1;
 
@@ -23,11 +14,14 @@ export class ZineCompressionClient {
   } = {}) {
     this.workers = [];
     for (let i = 0; i < numWorkers; i++) {
-      // const u = new URL('./zine-compression-server.js', import.meta.url);
-      // const worker = new Worker(u, {
-      //   // type: 'module',
-      // });
-      const worker = new ZineCompressionWorker();
+      // XXX need to localize this
+
+      // const u = new URL('/packages/zine/zine-compression-server.js', import.meta.url);
+      const u = '/packages/zine/zine-compression-server.js';
+      const worker = new Worker(u, {
+        type: 'module',
+      });
+      // const worker = new ZineCompressionWorker();
       const messageChannel = new MessageChannel();
       
       const readPort = messageChannel.port1;
@@ -85,7 +79,7 @@ export class ZineCompressionClient {
         const promise = makePromise();
         this.cbs.set(id, (error, result) => {
           if (!error) {
-            promise.accept(result);
+            promise.resolve(result);
           } else {
             promise.reject(error);
           }

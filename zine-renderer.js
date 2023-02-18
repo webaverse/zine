@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import * as BufferGeometryUtils from './third_party/three/BufferGeometryUtils.js';
 // import alea from 'alea';
 import {
   mainImageKey,
@@ -770,6 +770,7 @@ export class ZineRenderer extends EventTarget {
     const wallPlanes = layer1.getData('wallPlanes');
     const outlineJson = layer1.getData('outlineJson');
     const paths = layer1.getData('paths');
+    const lore = layer1.getData('lore');
 
     const [
       width,
@@ -927,6 +928,7 @@ export class ZineRenderer extends EventTarget {
       edgeDepths,
       outlineJson,
       paths,
+      lore,
     };
 
     this.#listen();

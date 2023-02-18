@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import * as BufferGeometryUtils from './third_party/three/BufferGeometryUtils.js';
 // import alea from 'alea';
 import {
   mainImageKey,

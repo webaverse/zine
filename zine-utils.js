@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
-import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
+// import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+// import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
+// import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {
   defaultCameraFov,
   floorNetWorldSize,
@@ -10,21 +10,21 @@ import {
 
 //
 
-// export const makePromise = () => {
-//   let resolve = null;
-//   let reject = null;
-//   const promise = new Promise((a, b) => {
-//     resolve = a;
-//     reject = b;
-//   });
-//   promise.resolve = resolve;
-//   promise.reject = reject;
-//   return promise;
-// }
+export const makePromise = () => {
+  let resolve = null;
+  let reject = null;
+  const promise = new Promise((a, b) => {
+    resolve = a;
+    reject = b;
+  });
+  promise.resolve = resolve;
+  promise.reject = reject;
+  return promise;
+}
 
 //
 
-export const makeRenderer = canvas => {
+/* export const makeRenderer = canvas => {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
@@ -38,17 +38,17 @@ export const makeRenderer = canvas => {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.setClearColor(0x000000, 0);
   return renderer;
-};
+}; */
 
 //
 
-export const makeGltfLoader = () => {
-  const gltfLoader = new GLTFLoader();
-  const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath('/three/draco/');
-  gltfLoader.setDRACOLoader(dracoLoader);
-  return gltfLoader;
-};
+// export const makeGltfLoader = () => {
+//   const gltfLoader = new GLTFLoader();
+//   const dracoLoader = new DRACOLoader();
+//   dracoLoader.setDecoderPath('/three/draco/');
+//   gltfLoader.setDRACOLoader(dracoLoader);
+//   return gltfLoader;
+// };
 
 //
 
@@ -146,3 +146,11 @@ export const normalToQuaternion = (() => {
 export function range(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
+
+//
+
+export const align = (v, N) => {
+  const r = v % N;
+  return r === 0 ? v : v - r + N;
+};
+export const align4 = v => align(v, 4);

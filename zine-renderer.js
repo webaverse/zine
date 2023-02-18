@@ -770,6 +770,7 @@ export class ZineRenderer extends EventTarget {
     const wallPlanes = layer1.getData('wallPlanes');
     const outlineJson = layer1.getData('outlineJson');
     const paths = layer1.getData('paths');
+    const lore = layer1.getData('lore');
 
     const [
       width,
@@ -927,6 +928,7 @@ export class ZineRenderer extends EventTarget {
       edgeDepths,
       outlineJson,
       paths,
+      lore,
     };
 
     this.#listen();

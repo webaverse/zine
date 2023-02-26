@@ -368,11 +368,14 @@ class ScenePhysicsMesh extends THREE.Mesh {
     segmentLabels,
     segmentLabelIndices,
   }) {
+    const targetWidth = width / physicsPixelStride;
+    const targetHeight = height / physicsPixelStride;
     let geometry = pointCloudArrayBufferToGeometry(
       pointCloudArrayBuffer,
       width,
       height,
-      physicsPixelStride,
+      targetWidth,
+      targetHeight,
     );
 
     // maintain strided segments attribute

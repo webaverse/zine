@@ -254,10 +254,10 @@ export function pointCloudArrayBufferToGeometry(
   // const width2 = width / pixelStride;
   // const height2 = height / pixelStride;
 
-  // // check that width and height are whole
-  // if (width2 % 1 !== 0 || height2 % 1 !== 0) {
-  //   throw new Error('width and height must be whole after division by pixelStride');
-  // }
+  // check that width and height are whole
+  if (targetWidth % 1 !== 0 || targetHeight % 1 !== 0) {
+    throw new Error('targetWidth and targetHeight must be whole numbers');
+  }
 
   const widthSegments = targetWidth - 1;
   const heightSegments = targetHeight - 1;

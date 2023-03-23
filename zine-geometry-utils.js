@@ -20,8 +20,8 @@ export function bilinearInterpolate(
   pz,
 ) {
   // first, compute the sample coordinates:
-  const x = Math.floor(px * width);
-  const z = Math.floor(pz * height);
+  const x = Math.floor(px * (width - 1));
+  const z = Math.floor(pz * (height - 1));
   const x1 = Math.min(x + 1, width - 1);
   const z1 = Math.min(z + 1, height - 1);
   const index = z * width + x;
@@ -35,13 +35,14 @@ export function bilinearInterpolate(
   const fx1 = 1 - fx;
   const fz1 = 1 - fz;
 
-  // and finally, interpolate:
-  return (
+  // finally, interpolate:
+  const v = (
     values[index] * fx1 * fz1 +
     values[index1] * fx * fz1 +
     values[index2] * fx1 * fz +
     values[index3] * fx * fz
   );
+  return v;
 }
 export function bilinearInterpolateChecked(
   values,

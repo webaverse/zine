@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-// import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
-// import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
-// import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {GLTFExporter} from 'three/examples/jsm/exporters/GLTFExporter.js';
+import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {
   defaultCameraFov,
   floorNetWorldSize,
@@ -42,13 +42,13 @@ export const makeRenderer = canvas => {
 
 //
 
-// export const makeGltfLoader = () => {
-//   const gltfLoader = new GLTFLoader();
-//   const dracoLoader = new DRACOLoader();
-//   dracoLoader.setDecoderPath('/three/draco/');
-//   gltfLoader.setDRACOLoader(dracoLoader);
-//   return gltfLoader;
-// };
+export const makeGltfLoader = () => {
+  const gltfLoader = new GLTFLoader();
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath('/three/draco/');
+  gltfLoader.setDRACOLoader(dracoLoader);
+  return gltfLoader;
+};
 
 //
 
